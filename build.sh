@@ -6,6 +6,6 @@ colcon build --symlink-install;
 
 echo "WS built.";
 
-source ./install/setup.bash;
+source install/setup.bash;
 
 echo "source finished";
