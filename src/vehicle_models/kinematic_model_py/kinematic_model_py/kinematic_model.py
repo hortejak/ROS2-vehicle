@@ -7,27 +7,32 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 
 class KinematicModel(Node):
 
-    # origin point is REAR AXLE
+    # origin point is center of gravity
 
     def __init__(self):
         super().__init__("kinematic_model_py")
+
+        # params
+        self.a_min = -5
+        self.a_max = 5
+        self.lf = 1.4
+        self.lr = 1.4
+
         self.get_logger().info("Kinematic model starting")
         self.create_timer(0.02,self.run)
 
-        self.state_publisher = self.create_publisher(KinematicState,'/kinematic/state',10)
+        self.state_publisher = self.create_publisher(KinematicState,'state/kinematic',10)
         self.pose_publisher = self.create_publisher(Pose,"/odometry/position",10)
 
-        self.input_subscriber = self.create_subscription(KinematicInput,"/kinematic/input",self.get_input,10)
+        self.input_subscriber = self.create_subscription(KinematicInput,"input/kinematic",self.get_input,10)
 
         self.t0 = self.get_clock().now()
-
-        self.length = 2.8
         self.X = np.zeros(4)
         self.u = np.zeros(2)
 
     def get_input(self, msg):
 
-        self.u[0] = msg.a
+        self.u[0] = np.clip(msg.a, self.a_min, self.a_max)
         self.u[1] = msg.delta
 
     def compute_derivatives(self):
@@ -40,10 +45,12 @@ class KinematicModel(Node):
         """
 
         dX = np.zeros(4)
+
+        beta = np.arctan(self.lr*np.tan(self.u[1])/(self.lf+self.lr))
         
-        dX[0] = self.X[3] * np.cos(self.X[2])
-        dX[1] = self.X[3] * np.sin(self.X[2])
-        dX[2] = self.X[3] * np.tan(self.u[1]) / self.length
+        dX[0] = self.X[3] * np.cos(self.X[2]+beta)
+        dX[1] = self.X[3] * np.sin(self.X[2]+beta)
+        dX[2] = self.X[3] * np.cos(beta) * np.tan(self.u[1]) / (self.lf + self.lr)
         dX[3] = self.u[0]
 
         return dX
@@ -58,6 +65,8 @@ class KinematicModel(Node):
         return q
     
     def run(self):
+
+        # TODO: improve by not taking u for the whole time but have 2 counters and 2 computations
 
         # get time
         dt = (self.get_clock().now() - self.t0).nanoseconds / 1e9
