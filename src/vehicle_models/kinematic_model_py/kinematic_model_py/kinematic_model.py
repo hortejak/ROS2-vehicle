@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-import numpy as np
 from interfaces.msg import KinematicState, KinematicInput
 from geometry_msgs.msg import Pose, Point, Quaternion
+
+import numpy as np
 
 class KinematicModel(Node):
 
@@ -15,24 +16,30 @@ class KinematicModel(Node):
         # params
         self.a_min = -5
         self.a_max = 5
+        a_rate_limit_per_s = 5
         self.lf = 1.4
         self.lr = 1.4
 
+        dt = 0.05
+        self.a_rate_limit = a_rate_limit_per_s * dt
+
+        self.t0 = self.get_clock().now().nanoseconds / 1e9
+        self.X = np.zeros(4)
+        self.u = np.zeros(2)
+
         self.get_logger().info("Kinematic model starting")
-        self.create_timer(0.02,self.run)
+        self.create_timer(dt,self.run)
 
         self.state_publisher = self.create_publisher(KinematicState,'state/kinematic',10)
         self.pose_publisher = self.create_publisher(Pose,"/odometry/position",10)
 
         self.input_subscriber = self.create_subscription(KinematicInput,"input/kinematic",self.get_input,10)
 
-        self.t0 = self.get_clock().now()
-        self.X = np.zeros(4)
-        self.u = np.zeros(2)
-
+        
     def get_input(self, msg):
 
-        self.u[0] = np.clip(msg.a, self.a_min, self.a_max)
+        da = np.clip(msg.a - self.u[0],a_min=-self.a_rate_limit,a_max=self.a_rate_limit)
+        self.u[0] = np.clip(self.u[0]+da, a_min=self.a_min,a_max=self.a_max)
         self.u[1] = msg.delta
 
     def compute_derivatives(self):
@@ -69,7 +76,9 @@ class KinematicModel(Node):
         # TODO: improve by not taking u for the whole time but have 2 counters and 2 computations
 
         # get time
-        dt = (self.get_clock().now() - self.t0).nanoseconds / 1e9
+        t = self.get_clock().now().nanoseconds / 1e9
+        dt = t - self.t0
+        self.t0 = t
         #calculate the addition during this time
         self.X = self.X + self.compute_derivatives() * dt
 
