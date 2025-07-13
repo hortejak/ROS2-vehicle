@@ -1,0 +1,21 @@
+<launch>
+
+  <node pkg="tfs" exec="base_link_to_world" name="tf_base_link_to_world" output="screen"/>
+  
+  <node pkg="tf2_ros" exec="static_transform_publisher" name="tf_flw_to_base_link" output="screen"
+        args="0.4 0.3 -0.1 1.5708 0 0 base_link front_left_wheel"/>
+
+  <node pkg="tf2_ros" exec="static_transform_publisher" name="tf_frw_to_base_link" output="screen"
+        args="0.4 -0.3 -0.1 1.5708 0 0 base_link front_right_wheel"/>
+
+  <node pkg="tf2_ros" exec="static_transform_publisher" name="tf_rlw_to_base_link" output="screen"
+        args="-0.4 0.3 -0.1 1.5708 0 0 base_link rear_left_wheel"/>
+
+  <node pkg="tf2_ros" exec="static_transform_publisher" name="tf_rrw_to_base_link" output="screen"
+        args="-0.4 -0.3 -0.1 1.5708 0 0 base_link rear_right_wheel"/>
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" exec="robot_state_publisher" output="screen">
+    <param name="robot_description" value="$(command 'cat $(var urdf_file)')"/>
+  </node>
+  
+</launch>

@@ -2,7 +2,7 @@
 import rclpy
 from rclpy.node import Node
 from interfaces.msg import KinematicState, KinematicInput
-from geometry_msgs.msg import Pose, Point, Quaternion
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 
 import numpy as np
 
@@ -27,11 +27,13 @@ class KinematicModel(Node):
         self.X = np.zeros(4)
         self.u = np.zeros(2)
 
+        self.pose_publisher_seq = 0
+
         self.get_logger().info("Kinematic model starting")
         self.create_timer(dt,self.run)
 
         self.state_publisher = self.create_publisher(KinematicState,'state/kinematic',10)
-        self.pose_publisher = self.create_publisher(Pose,"/odometry/position",10)
+        self.pose_publisher = self.create_publisher(PoseStamped,"/odometry/position",10)
 
         self.input_subscriber = self.create_subscription(KinematicInput,"input/kinematic",self.get_input,10)
 
@@ -108,7 +110,12 @@ class KinematicModel(Node):
         pose.position = p
         pose.orientation = q
 
-        self.pose_publisher.publish(pose)   
+        ps = PoseStamped()
+        ps.pose = pose
+        ps.header.frame_id = "map"
+        #ps.header.stamp = self.get_clock().now().nanoseconds / 1e9
+
+        self.pose_publisher.publish(ps)   
 
 
 def main(args=None):
