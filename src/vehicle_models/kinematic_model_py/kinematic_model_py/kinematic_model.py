@@ -23,13 +23,22 @@ class KinematicModel(Node):
         dt = 0.05
         self.a_rate_limit = a_rate_limit_per_s * dt
 
+        self.declare_parameter('origin_x',0.0)
+        self.declare_parameter('origin_y',0.0)
+        self.declare_parameter('origin_theta',0.0)
+
+        origin_x = self.get_parameter('origin_x').get_parameter_value().double_value
+        origin_y = self.get_parameter('origin_y').get_parameter_value().double_value
+        origin_theta = self.get_parameter('origin_theta').get_parameter_value().double_value
+
         self.t0 = self.get_clock().now().nanoseconds / 1e9
-        self.X = np.zeros(4)
+        self.X = np.array([origin_x,origin_y,origin_theta,0])
         self.u = np.zeros(2)
 
         self.pose_publisher_seq = 0
 
         self.get_logger().info("Kinematic model starting")
+        self.get_logger().info(f'Beginning from x={origin_x}; y={origin_y}; theta={origin_theta}')
         self.create_timer(dt,self.run)
 
         self.state_publisher = self.create_publisher(KinematicState,'state/kinematic',10)
@@ -119,6 +128,9 @@ class KinematicModel(Node):
 
 
 def main(args=None):
+
+    print(args)
+
     rclpy.init(args=args)
     model = KinematicModel()
 

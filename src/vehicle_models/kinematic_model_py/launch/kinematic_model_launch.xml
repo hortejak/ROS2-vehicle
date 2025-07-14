@@ -1,0 +1,9 @@
+<launch>
+
+  <node name="kinematic_model" pkg="kinematic_model_py" exec="kinematic_model_py" output="screen">
+    <param name="origin_x" value="3.0"/>
+    <param name="origin_y" value="2.0"/>
+    <param name="origin_theta" value="1.0"/>
+  </node>
+
+</launch>
