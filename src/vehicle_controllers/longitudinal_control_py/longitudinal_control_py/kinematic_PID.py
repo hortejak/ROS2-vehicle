@@ -8,20 +8,28 @@ import numpy as np
 import time
 
 class PID():
-    def __init__(self,P=1,I=0,D=0,max_output=100,min_output=-100):
-        self.P = P
-        self.I = I
-        self.D = D
+    def __init__(self,P=1,I=0,D=0,max_output=100,min_output=-100,N=10):
 
+        # integral part
+
+        self.clamp = False
+        self.integral = 0
+
+        # derivative part
+
+        self.derivative_integral = 0
+        self.derivative_filter_N = N
+
+        # general
+
+        self.prev_time = 0
         self.max_output = max_output
         self.min_output = min_output
 
-        self.clamp = False
-
-        self.integral = 0
-        self.prev_value = 0
-
-        self.prev_time = 0
+        self.P = P
+        self.I = I
+        self.D = D
+        
 
     def calculate(self,value):
         dt = self.get_dt()
@@ -50,10 +58,8 @@ class PID():
 
     def manage_derivative(self,addition,dt):
 
-        # TODO: add LP filter
-
-        derivative = (addition - self.prev_value) / dt
-        self.prev_value = derivative
+        derivative = (addition - self.derivative_integral) * self.derivative_filter_N
+        self.derivative_integral += derivative
 
         return derivative
     
