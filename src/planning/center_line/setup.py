@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'tfs'
+package_name = 'center_line'
 
 setup(
     name=package_name,
@@ -20,8 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "base_link_to_world = tfs.base_link_to_world:main",
-            "grid_to_world = tfs.grid_to_world:main"
+            "center_line_from_grid = center_line.center_line_from_grid:main"
         ],
     },
 )

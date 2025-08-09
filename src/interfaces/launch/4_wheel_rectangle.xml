@@ -1,6 +1,8 @@
 <launch>
 
   <node pkg="tfs" exec="base_link_to_world" name="tf_base_link_to_world" output="screen"/>
+
+  <node pkg="tfs" exec="grid_to_world" name="tf_grid_to_world" output="screen"/>
   
   <node pkg="tf2_ros" exec="static_transform_publisher" name="tf_flw_to_base_link" output="screen"
         args="0.4 0.3 -0.1 1.5708 0 0 base_link front_left_wheel"/>
