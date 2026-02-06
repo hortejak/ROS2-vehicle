@@ -298,12 +298,6 @@ class CenterLinePublisher(Node):
         self.line = self.np2path(i_line)
         self.publishing = True
 
-        #position = np.array([92,106])
-
-        #cp = self.find_closest_point(ref_point=position,line=i_line,show=True)
-
-        #print(cp)
-
 
 
 def main(args=None):

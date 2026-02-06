@@ -1,0 +1,3 @@
+string name
+uint16 id
+Dimensions vehicle_dimensions

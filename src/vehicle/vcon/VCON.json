@@ -1,0 +1,14 @@
+{
+  "vehicle": {
+    "metadata": {
+      "id": 1,
+      "name": "Vader",
+      "description": "Standard sedan model"
+    },
+    "dimensions": {
+      "length": 4.5,
+      "width": 1.8,
+      "height": 1.5
+    }
+  }
+}
