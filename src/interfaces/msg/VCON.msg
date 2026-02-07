@@ -1,3 +1,3 @@
 string name
 uint16 id
-Dimensions vehicle_dimensions
+VehicleDimensions vehicle_dimensions

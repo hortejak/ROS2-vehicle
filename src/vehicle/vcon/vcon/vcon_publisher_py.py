@@ -1,4 +1,5 @@
-#usr/bin/env python3
+#!/usr/bin/env python3
+
 import rclpy
 import json
 import os
@@ -43,16 +44,19 @@ class VCONPublisher(Node):
         self.vcon.vehicle_dimensions.length = float(dims['length'])
         self.vcon.vehicle_dimensions.width = float(dims['width'])
         self.vcon.vehicle_dimensions.height = float(dims['height'])
+        self.vcon.vehicle_dimensions.wheelbase = float(dims['wheelbase'])
+        self.vcon.vehicle_dimensions.track_width = float(dims['track_width'])
 
     def run(self):       
 
         self.vcon_publisher.publish(self.vcon)
-
-
-
 
 def main(args=None):
     rclpy.init()
     node = VCONPublisher()
     rclpy.spin(node)
     rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,31 +1,37 @@
 cmake_minimum_required(VERSION 3.8)
-project(interfaces)
+project(vcon)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 # find dependencies
+
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 
-find_package(rosidl_default_generators REQUIRED)
+include_directories(include)
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/VehicleDimensions.msg"
-  "msg/KinematicState.msg"
-  "msg/KinematicInput.msg"  
-  "msg/VCON.msg"
+add_executable(vcon_publisher_cpp src/vcon_publisher_cpp.cpp)
+ament_target_dependencies(vcon_publisher_cpp rclcpp)
+
+install(TARGETS
+  vcon_publisher_cpp
+  DESTINATION lib/${PROJECT_NAME})
+
+
+# Install Python modules
+ament_python_install_package(${PROJECT_NAME})
+
+install(PROGRAMS
+  vcon/vcon_publisher_py.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
-ament_export_dependencies(rosidl_default_runtime)
-
-install(
-  DIRECTORY launch
-  DIRECTORY urdf
-  DIRECTORY rviz
+install(FILES
+  VCON.json
   DESTINATION share/${PROJECT_NAME}
 )
 
