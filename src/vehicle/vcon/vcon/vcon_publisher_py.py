@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-
 import rclpy
-import json
+import yaml
 import os
 from rclpy.node import Node
 from ament_index_python.packages import get_package_share_directory
@@ -30,7 +29,7 @@ class VCONPublisher(Node):
     def load_vehicle_config(self, file_path):
 
         with open(file_path, 'r') as f:
-            data = json.load(f)
+            data = yaml.safe_load(f)
             
         vehicle = data['vehicle']
         dims = vehicle['dimensions']
@@ -40,7 +39,6 @@ class VCONPublisher(Node):
         self.vcon.id = vehicle['metadata']['id']
         self.vcon.name = vehicle['metadata']['name']
         
-        # Mapping the JSON to your nested message
         self.vcon.vehicle_dimensions.length = float(dims['length'])
         self.vcon.vehicle_dimensions.width = float(dims['width'])
         self.vcon.vehicle_dimensions.height = float(dims['height'])

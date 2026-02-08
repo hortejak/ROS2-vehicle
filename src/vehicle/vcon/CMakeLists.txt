@@ -31,7 +31,7 @@ install(PROGRAMS
 )
 
 install(FILES
-  VCON.json
+  VCON.yaml
   DESTINATION share/${PROJECT_NAME}
 )
 
