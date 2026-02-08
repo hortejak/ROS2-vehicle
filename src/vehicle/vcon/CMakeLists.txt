@@ -11,11 +11,21 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(ament_index_cpp REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(interfaces REQUIRED)
 
 include_directories(include)
 
 add_executable(vcon_publisher_cpp src/vcon_publisher_cpp.cpp)
-ament_target_dependencies(vcon_publisher_cpp rclcpp)
+
+# Link the libraries
+target_link_libraries(vcon_publisher_cpp
+  ament_index_cpp::ament_index_cpp
+  yaml-cpp
+)
+
+ament_target_dependencies(vcon_publisher_cpp rclcpp interfaces)
 
 install(TARGETS
   vcon_publisher_cpp

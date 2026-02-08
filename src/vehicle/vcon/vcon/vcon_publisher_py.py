@@ -16,7 +16,7 @@ class VCONPublisher(Node):
         self.get_logger().info("Loading VCON")
 
         package_share_directory = get_package_share_directory('vcon')
-        file_path = os.path.join(package_share_directory, 'VCON.json')
+        file_path = os.path.join(package_share_directory, 'VCON.yaml')
         self.load_vehicle_config(file_path)
 
         self.get_logger().info("VCON loaded")
