@@ -1,0 +1,7 @@
+<launch>
+
+  <node name="vcon_publisher_cpp" pkg="vcon" exec="vcon_publisher_cpp" output="screen">
+
+  </node>
+
+</launch>

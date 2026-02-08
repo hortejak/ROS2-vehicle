@@ -1,0 +1,7 @@
+<launch>
+
+  <node name="vcon_publisher_py" pkg="vcon" exec="vcon_publisher_py.py" output="screen">
+
+  </node>
+
+</launch>
