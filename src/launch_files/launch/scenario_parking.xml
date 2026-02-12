@@ -1,0 +1,14 @@
+<launch>
+
+  <!-- Vehicle configuration server -->
+  <include file="$(find-pkg-share vcon)/launch/vcon_publisher_cpp.xml"/>            
+
+  <!-- Vehicle odometry -->
+  <include file="$(find-pkg-share kinematic_model_py)/launch/kinematic_model_launch.xml">
+    <arg name="arg_origin_type" value="ra"/>
+  </include>
+
+  <!-- RVIZ -->
+  <include file="$(find-pkg-share launch_files)/launch/rviz_visualization.xml"/>
+
+</launch>

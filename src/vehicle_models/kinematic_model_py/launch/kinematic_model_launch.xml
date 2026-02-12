@@ -1,9 +1,17 @@
 <launch>
 
+  <arg name="arg_origin_x" default="0.0"/>
+  <arg name="arg_origin_y" default="0.0"/>
+  <arg name="arg_origin_theta" default="0.0"/>
+
+  <arg name="arg_origin_type" default="cog"/>
+
   <node name="kinematic_model" pkg="kinematic_model_py" exec="kinematic_model_py" output="screen">
-    <param name="origin_x" value="0.0"/>
-    <param name="origin_y" value="0.0"/>
-    <param name="origin_theta" value="0.0"/>
+    <param name="origin_x" value="$(var arg_origin_x)"/>
+    <param name="origin_y" value="$(var arg_origin_y)"/>
+    <param name="origin_theta" value="$(var arg_origin_theta)"/>
+
+    <param name="origin_type" value="$(var arg_origin_type)"/>
   </node>
 
 </launch>

@@ -1,0 +1,7 @@
+<launch>
+
+  <node name="rviz_vehicle_visualizator_py" pkg="rviz_vehicle_visualizator" exec="vehicle_visualizator_py.py" output="screen">
+
+  </node>
+
+</launch>

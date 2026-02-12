@@ -153,6 +153,26 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /planning/path
       Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz_default_plugins/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /odometry/position
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -199,25 +219,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/XYOrbit
-      Distance: 112.6499252319336
+      Distance: 12.568519592285156
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 17.94050407409668
-        Y: -3.629558563232422
-        Z: -1.1683778211590834e-05
+        X: 2.3492026329040527
+        Y: -1.8222310543060303
+        Z: -1.8485719920136034e-05
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3847965002059937
+      Pitch: 0.7397969365119934
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz_default_plugins)
-      Yaw: 0.005403880961239338
+      Yaw: 3.2035882472991943
     Saved: ~
 Window Geometry:
   Displays:

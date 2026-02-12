@@ -1,6 +1,5 @@
 <launch>
   <arg name="urdf_file" default="$(find-pkg-share interfaces)/urdf/simple_vehicle.urdf"/>
-
   <node name="rviz2" pkg="rviz2" exec="rviz2" output="screen" args="-d $(find-pkg-share interfaces)/rviz/basic_view.rviz"/>
 
   <node pkg="tfs" exec="axles_to_world" name="tf_axles_to_world" output="screen"/>

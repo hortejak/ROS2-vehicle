@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             "base_link_to_world = tfs.base_link_to_world:main",
-            "grid_to_world = tfs.grid_to_world:main"
+            "grid_to_world = tfs.grid_to_world:main",
+            "axles_to_world = tfs.axles_to_world:main",
         ],
     },
 )
