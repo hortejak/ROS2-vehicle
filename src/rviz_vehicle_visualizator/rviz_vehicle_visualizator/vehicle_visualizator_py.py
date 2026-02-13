@@ -3,7 +3,7 @@ import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
 from interfaces.msg import VCON as VCON_msg
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point
 
 class VehicleWireframeVisualizer(Node):
@@ -66,14 +66,19 @@ class VehicleWireframeVisualizer(Node):
             Point(x=dx, y=dy, z=0.0),  # 4: bottom front left
             Point(x=dx, y=-dy, z=0.0), # 5: bottom front right
             Point(x=-dx, y=-dy, z=0.0),# 6: bottom back right
-            Point(x=-dx, y=dy, z=0.0)  # 7: bottom back left
+            Point(x=-dx, y=dy, z=0.0), # 7: bottom back left
+            Point(x=self.vcon.vehicle_dimensions.wheelbase/2,y=self.vcon.vehicle_dimensions.track_width/2,z=0.0),  #8: front lext axle
+            Point(x=self.vcon.vehicle_dimensions.wheelbase/2,y=-self.vcon.vehicle_dimensions.track_width/2,z=0.0),  #9: front right axle
+            Point(x=-self.vcon.vehicle_dimensions.wheelbase/2,y=self.vcon.vehicle_dimensions.track_width/2,z=0.0),  #10: rear lext axle
+            Point(x=-self.vcon.vehicle_dimensions.wheelbase/2,y=-self.vcon.vehicle_dimensions.track_width/2,z=0.0)  #11: rear right axle
         ]
 
         # Define the 12 edges (pairs of vertices)
         edges = [
             (0,1), (1,2), (2,3), (3,0), # Top face
             (4,5), (5,6), (6,7), (7,4), # Bottom face
-            (0,4), (1,5), (2,6), (3,7)  # Vertical pillars
+            (0,4), (1,5), (2,6), (3,7), # Vertical pillars
+            (8,9), (10,11)              # Axles
         ]
 
         for start, end in edges:
