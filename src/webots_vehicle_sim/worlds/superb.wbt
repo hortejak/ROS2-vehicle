@@ -1,0 +1,203 @@
+#VRML_SIM R2025a utf8
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/StraightRoadSegment.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/RoadLine.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/appearances/protos/Asphalt.proto"
+
+WorldInfo {
+  title "Vehicle Simulation"
+  basicTimeStep 16
+  coordinateSystem "NUE"
+}
+
+Viewpoint {
+  orientation 0 1 0 1.5708
+  position 0 8 20
+  follow "Skoda Superb Mk1"
+  followType "Tracking Shot"
+}
+
+Background {
+  skyColor [
+    0.4 0.7 1.0
+    0.4 0.7 1.0
+    0.4 0.7 1.0
+    0.4 0.7 1.0
+    0.4 0.7 1.0
+    0.4 0.7 1.0
+  ]
+}
+
+DirectionalLight {
+  ambientIntensity 1
+  direction 0.1 -1 -0.5
+  intensity 1
+}
+
+RectangleArena {
+  floorSize 500 500
+  floorTileSize 500 500
+  floorAppearance Asphalt {}
+  wallHeight 0.1
+}
+
+StraightRoadSegment {
+  translation 0 0 0
+  name "main_road"
+  width 8
+  numberOfLanes 2
+  numberOfForwardLanes 1
+  lines [
+    RoadLine {
+      color 0.85 0.85 0.0
+      type "continuous"
+      width 0.15
+    }
+  ]
+  length 200
+  roadBoundingObject FALSE
+}
+
+DEF superb Robot {
+  translation 0 0.2377 0
+  rotation 0 1 0 0
+  name "Skoda Superb Mk1"
+  children [
+
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.13 0.25 0.13
+        roughness 0.4
+        metalness 0.6
+      }
+      geometry Box { size 4.8030 1.4690 1.7650 }
+    }
+
+    DEF FRONT_LEFT_WHEEL HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 0 1
+        anchor 1.4015 0.2277 0.7575
+      }
+      device [
+        RotationalMotor {
+          name "front_left_motor"
+          maxVelocity 100
+        }
+      ]
+      endPoint Solid {
+        translation 1.4015 0.2277 0.7575
+        rotation 1 0 0 1.5708
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.1 0.1 0.1
+              roughness 0.9
+            }
+            geometry Cylinder { radius 0.2277 height 0.1500 }
+          }
+        ]
+        name "front_left_wheel"
+        boundingObject Cylinder { radius 0.2277 height 0.1500 }
+        physics Physics { density -1 mass 12 }
+      }
+    }
+
+    DEF FRONT_RIGHT_WHEEL HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 0 1
+        anchor 1.4015 0.2277 -0.7575
+      }
+      device [
+        RotationalMotor {
+          name "front_right_motor"
+          maxVelocity 100
+        }
+      ]
+      endPoint Solid {
+        translation 1.4015 0.2277 -0.7575
+        rotation 1 0 0 1.5708
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.1 0.1 0.1
+              roughness 0.9
+            }
+            geometry Cylinder { radius 0.2277 height 0.1500 }
+          }
+        ]
+        name "front_right_wheel"
+        boundingObject Cylinder { radius 0.2277 height 0.1500 }
+        physics Physics { density -1 mass 12 }
+      }
+    }
+
+    DEF REAR_LEFT_WHEEL HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 0 1
+        anchor -1.4015 0.2277 0.7575
+      }
+      device [
+        RotationalMotor {
+          name "rear_left_motor"
+          maxVelocity 100
+        }
+      ]
+      endPoint Solid {
+        translation -1.4015 0.2277 0.7575
+        rotation 1 0 0 1.5708
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.1 0.1 0.1
+              roughness 0.9
+            }
+            geometry Cylinder { radius 0.2277 height 0.1500 }
+          }
+        ]
+        name "rear_left_wheel"
+        boundingObject Cylinder { radius 0.2277 height 0.1500 }
+        physics Physics { density -1 mass 12 }
+      }
+    }
+
+    DEF REAR_RIGHT_WHEEL HingeJoint {
+      jointParameters HingeJointParameters {
+        axis 0 0 1
+        anchor -1.4015 0.2277 -0.7575
+      }
+      device [
+        RotationalMotor {
+          name "rear_right_motor"
+          maxVelocity 100
+        }
+      ]
+      endPoint Solid {
+        translation -1.4015 0.2277 -0.7575
+        rotation 1 0 0 1.5708
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.1 0.1 0.1
+              roughness 0.9
+            }
+            geometry Cylinder { radius 0.2277 height 0.1500 }
+          }
+        ]
+        name "rear_right_wheel"
+        boundingObject Cylinder { radius 0.2277 height 0.1500 }
+        physics Physics { density -1 mass 12 }
+      }
+    }
+
+  ]
+
+  boundingObject Box { size 4.8030 1.4690 1.7650 }
+
+  physics Physics {
+    density -1
+    mass 1450
+    centerOfMass [ 0 -0.1469 0 ]
+  }
+
+  controller "<extern>"
+}

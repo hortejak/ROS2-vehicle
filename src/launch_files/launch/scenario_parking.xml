@@ -8,6 +8,20 @@
     <arg name="arg_origin_type" value="ra"/>
   </include>
 
+  <!-- Scenario map -->
+
+
+  <!-- Slot selection -->
+
+
+  <!-- Goal selection -->
+
+  <!-- Global path finder -->
+
+  <!-- Local path changer -->
+
+  <!-- Path following -->
+
   <!-- RVIZ -->
   <include file="$(find-pkg-share launch_files)/launch/rviz_visualization.xml"/>
 
