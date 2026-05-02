@@ -31,26 +31,22 @@ def generate_world(dims) -> str:
     wheel_radius    = height * 0.155
     wheel_thickness = width  * 0.085
 
-    front_x = wheelbase / 2.0
-    rear_x  = -wheelbase / 2.0
+    front_axle_x = wheelbase
+    front_axle_y = 0
+    front_axle_z = wheel_radius
 
-    left_z  = track_width / 2.0
-    right_z = -track_width / 2.0
+    rear_axle_x = 0
+    rear_axle_y = 0
+    rear_axle_z = wheel_radius
 
-    # Vertical positions (Y axis = up in NUE)
-    wheel_y  = wheel_radius                    # wheel center sits on ground
-    body_y   = wheel_radius + height / 2.0    # body center above ground
+    cog_x = wheelbase/2
+    cog_y = 0
+    cog_z = wheel_radius + height/2
 
-    vehicle_y = wheel_y
-
-    roof_length = length * 0.60
-    roof_width  = width  * 0.92
-    roof_height = height * 0.30
+    left_y  =  track_width / 2.0
+    right_y = -track_width / 2.0
 
     r,  g,  b  = 0.13, 0.25, 0.13
-    gr, gg, gb = 0.15, 0.20, 0.25
-
-    vehicle_y = wheel_radius + 0.01
 
     world = (
         '#VRML_SIM R2025a utf8\n'
@@ -62,12 +58,12 @@ def generate_world(dims) -> str:
         'WorldInfo {\n'
         '  title "Vehicle Simulation"\n'
         '  basicTimeStep 16\n'
-        '  coordinateSystem "NUE"\n'
+        '  coordinateSystem "ENU"\n'
         '}\n'
         '\n'
         'Viewpoint {\n'
-        '  orientation 0 1 0 1.5708\n'
-        '  position 0 8 20\n'
+        '  orientation 0 1 0 0.221\n'
+        '  position -50 0 15\n'
         '  follow "Skoda Superb Mk1"\n'
         '  followType "Tracking Shot"\n'
         '}\n'
@@ -114,24 +110,29 @@ def generate_world(dims) -> str:
         '}\n'
         '\n'
         'DEF superb Robot {\n'
-        f'  translation 0 {vehicle_y:.4f} 0\n'
-        '  rotation 0 1 0 0\n'
+        '  translation 0 0 0\n'
+        '  rotation 0 0 1 0\n'
         '  name "Skoda Superb Mk1"\n'
         '  children [\n'
         '\n'
-        '    Shape {\n'
-        '      appearance PBRAppearance {\n'
-        f'        baseColor {r} {g} {b}\n'
-        '        roughness 0.4\n'
-        '        metalness 0.6\n'
-        '      }\n'
-        f'      geometry Box {{ size {length:.4f} {height:.4f} {width:.4f} }}\n'
+        f'    Transform {{\n'
+        f'      translation {cog_x:.4f} {cog_y:.4f} {cog_z:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        f'            baseColor {r} {g} {b}\n'
+        '            roughness 0.4\n'
+        '            metalness 0.6\n'
+        '          }\n'
+        f'          geometry Box {{ size {length:.4f} {width:.4f} {height:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
         '    }\n'
         '\n'
         '    DEF FRONT_LEFT_WHEEL HingeJoint {\n'
         '      jointParameters HingeJointParameters {\n'
-        '        axis 0 0 1\n'
-        f'        anchor {front_x:.4f} {wheel_y:.4f} {left_z:.4f}\n'
+        '        axis 0 1 0\n'
+        f'        anchor {front_axle_x:.4f} {left_y:.4f} {front_axle_z:.4f}\n'
         '      }\n'
         '      device [\n'
         '        RotationalMotor {\n'
@@ -140,8 +141,8 @@ def generate_world(dims) -> str:
         '        }\n'
         '      ]\n'
         '      endPoint Solid {\n'
-        f'        translation {front_x:.4f} {wheel_y:.4f} {left_z:.4f}\n'
-        '        rotation 1 0 0 1.5708\n'
+        f'        translation {front_axle_x:.4f} {left_y:.4f} {front_axle_z:.4f}\n'
+        '        rotation 1 0 0 -1.5708\n'
         '        children [\n'
         '          Shape {\n'
         '            appearance PBRAppearance {\n'
@@ -149,6 +150,13 @@ def generate_world(dims) -> str:
         '              roughness 0.9\n'
         '            }\n'
         f'            geometry Cylinder {{ radius {wheel_radius:.4f} height {wheel_thickness:.4f} }}\n'
+        '          }\n'
+        '          Shape {\n'
+        '            appearance PBRAppearance {\n'
+        '              baseColor 0.9 0.9 0.9\n'
+        '              roughness 0.5\n'
+        '            }\n'
+        f'            geometry Box {{ size {wheel_radius * 2:.4f} {wheel_thickness * 0.8:.4f} {wheel_radius * 0.15:.4f} }}\n'
         '          }\n'
         '        ]\n'
         '        name "front_left_wheel"\n'
@@ -159,8 +167,8 @@ def generate_world(dims) -> str:
         '\n'
         '    DEF FRONT_RIGHT_WHEEL HingeJoint {\n'
         '      jointParameters HingeJointParameters {\n'
-        '        axis 0 0 1\n'
-        f'        anchor {front_x:.4f} {wheel_y:.4f} {right_z:.4f}\n'
+        '        axis 0 1 0\n'
+        f'        anchor {front_axle_x:.4f} {right_y:.4f} {front_axle_z:.4f}\n'
         '      }\n'
         '      device [\n'
         '        RotationalMotor {\n'
@@ -169,8 +177,8 @@ def generate_world(dims) -> str:
         '        }\n'
         '      ]\n'
         '      endPoint Solid {\n'
-        f'        translation {front_x:.4f} {wheel_y:.4f} {right_z:.4f}\n'
-        '        rotation 1 0 0 1.5708\n'
+        f'        translation {front_axle_x:.4f} {right_y:.4f} {front_axle_z:.4f}\n'
+        '        rotation 1 0 0 -1.5708\n'
         '        children [\n'
         '          Shape {\n'
         '            appearance PBRAppearance {\n'
@@ -178,6 +186,13 @@ def generate_world(dims) -> str:
         '              roughness 0.9\n'
         '            }\n'
         f'            geometry Cylinder {{ radius {wheel_radius:.4f} height {wheel_thickness:.4f} }}\n'
+        '          }\n'
+        '          Shape {\n'
+        '            appearance PBRAppearance {\n'
+        '              baseColor 0.9 0.9 0.9\n'
+        '              roughness 0.5\n'
+        '            }\n'
+        f'            geometry Box {{ size {wheel_radius * 2:.4f} {wheel_thickness * 0.8:.4f} {wheel_radius * 0.15:.4f} }}\n'
         '          }\n'
         '        ]\n'
         '        name "front_right_wheel"\n'
@@ -188,8 +203,8 @@ def generate_world(dims) -> str:
         '\n'
         '    DEF REAR_LEFT_WHEEL HingeJoint {\n'
         '      jointParameters HingeJointParameters {\n'
-        '        axis 0 0 1\n'
-        f'        anchor {rear_x:.4f} {wheel_y:.4f} {left_z:.4f}\n'
+        '        axis 0 1 0\n'
+        f'        anchor {rear_axle_x:.4f} {left_y:.4f} {rear_axle_z:.4f}\n'
         '      }\n'
         '      device [\n'
         '        RotationalMotor {\n'
@@ -198,8 +213,8 @@ def generate_world(dims) -> str:
         '        }\n'
         '      ]\n'
         '      endPoint Solid {\n'
-        f'        translation {rear_x:.4f} {wheel_y:.4f} {left_z:.4f}\n'
-        '        rotation 1 0 0 1.5708\n'
+        f'        translation {rear_axle_x:.4f} {left_y:.4f} {rear_axle_z:.4f}\n'
+        '        rotation 1 0 0 -1.5708\n'
         '        children [\n'
         '          Shape {\n'
         '            appearance PBRAppearance {\n'
@@ -207,6 +222,13 @@ def generate_world(dims) -> str:
         '              roughness 0.9\n'
         '            }\n'
         f'            geometry Cylinder {{ radius {wheel_radius:.4f} height {wheel_thickness:.4f} }}\n'
+        '          }\n'
+        '          Shape {\n'
+        '            appearance PBRAppearance {\n'
+        '              baseColor 0.9 0.9 0.9\n'
+        '              roughness 0.5\n'
+        '            }\n'
+        f'            geometry Box {{ size {wheel_radius * 2:.4f} {wheel_thickness * 0.8:.4f} {wheel_radius * 0.15:.4f} }}\n'
         '          }\n'
         '        ]\n'
         '        name "rear_left_wheel"\n'
@@ -217,8 +239,8 @@ def generate_world(dims) -> str:
         '\n'
         '    DEF REAR_RIGHT_WHEEL HingeJoint {\n'
         '      jointParameters HingeJointParameters {\n'
-        '        axis 0 0 1\n'
-        f'        anchor {rear_x:.4f} {wheel_y:.4f} {right_z:.4f}\n'
+        '        axis 0 1 0\n'
+        f'        anchor {rear_axle_x:.4f} {right_y:.4f} {rear_axle_z:.4f}\n'
         '      }\n'
         '      device [\n'
         '        RotationalMotor {\n'
@@ -227,8 +249,8 @@ def generate_world(dims) -> str:
         '        }\n'
         '      ]\n'
         '      endPoint Solid {\n'
-        f'        translation {rear_x:.4f} {wheel_y:.4f} {right_z:.4f}\n'
-        '        rotation 1 0 0 1.5708\n'
+        f'        translation {rear_axle_x:.4f} {right_y:.4f} {rear_axle_z:.4f}\n'
+        '        rotation 1 0 0 -1.5708\n'
         '        children [\n'
         '          Shape {\n'
         '            appearance PBRAppearance {\n'
@@ -236,6 +258,13 @@ def generate_world(dims) -> str:
         '              roughness 0.9\n'
         '            }\n'
         f'            geometry Cylinder {{ radius {wheel_radius:.4f} height {wheel_thickness:.4f} }}\n'
+        '          }\n'
+        '          Shape {\n'
+        '            appearance PBRAppearance {\n'
+        '              baseColor 0.9 0.9 0.9\n'
+        '              roughness 0.5\n'
+        '            }\n'
+        f'            geometry Box {{ size {wheel_radius * 2:.4f} {wheel_thickness * 0.8:.4f} {wheel_radius * 0.15:.4f} }}\n'
         '          }\n'
         '        ]\n'
         '        name "rear_right_wheel"\n'
@@ -246,12 +275,15 @@ def generate_world(dims) -> str:
         '\n'
         '  ]\n'
         '\n'
-        f'  boundingObject Box {{ size {length:.4f} {height:.4f} {width:.4f} }}\n'
+        f'  boundingObject Transform {{\n'
+        f'    translation {cog_x:.4f} {cog_y:.4f} {cog_z:.4f}\n'
+        f'    children [ Box {{ size {length:.4f} {width:.4f} {height:.4f} }} ]\n'
+        '  }\n'
         '\n'
         '  physics Physics {\n'
         '    density -1\n'
         '    mass 1450\n'
-        f'    centerOfMass [ 0 {(-height * 0.1):.4f} 0 ]\n'
+        f'    centerOfMass [ {cog_x:.4f} {cog_y:.4f} {(cog_z - height * 0.1):.4f} ]\n'
         '  }\n'
         '\n'
         '  controller "<extern>"\n'

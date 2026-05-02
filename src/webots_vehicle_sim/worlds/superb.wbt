@@ -7,12 +7,12 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/proje
 WorldInfo {
   title "Vehicle Simulation"
   basicTimeStep 16
-  coordinateSystem "NUE"
+  coordinateSystem "ENU"
 }
 
 Viewpoint {
-  orientation 0 1 0 1.5708
-  position 0 8 20
+  orientation 0 1 0 0.221
+  position -50 0 15
   follow "Skoda Superb Mk1"
   followType "Tracking Shot"
 }
@@ -59,24 +59,29 @@ StraightRoadSegment {
 }
 
 DEF superb Robot {
-  translation 0 0.2377 0
-  rotation 0 1 0 0
+  translation 0 0 0
+  rotation 0 0 1 0
   name "Skoda Superb Mk1"
   children [
 
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0.13 0.25 0.13
-        roughness 0.4
-        metalness 0.6
-      }
-      geometry Box { size 4.8030 1.4690 1.7650 }
+    Transform {
+      translation 1.4015 0.0000 0.9622
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.13 0.25 0.13
+            roughness 0.4
+            metalness 0.6
+          }
+          geometry Box { size 4.8030 1.7650 1.4690 }
+        }
+      ]
     }
 
     DEF FRONT_LEFT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
-        axis 0 0 1
-        anchor 1.4015 0.2277 0.7575
+        axis 0 1 0
+        anchor 2.8030 0.7575 0.2277
       }
       device [
         RotationalMotor {
@@ -85,8 +90,8 @@ DEF superb Robot {
         }
       ]
       endPoint Solid {
-        translation 1.4015 0.2277 0.7575
-        rotation 1 0 0 1.5708
+        translation 2.8030 0.7575 0.2277
+        rotation 1 0 0 -1.5708
         children [
           Shape {
             appearance PBRAppearance {
@@ -94,6 +99,13 @@ DEF superb Robot {
               roughness 0.9
             }
             geometry Cylinder { radius 0.2277 height 0.1500 }
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.9 0.9 0.9
+              roughness 0.5
+            }
+            geometry Box { size 0.4554 0.1200 0.0342 }
           }
         ]
         name "front_left_wheel"
@@ -104,8 +116,8 @@ DEF superb Robot {
 
     DEF FRONT_RIGHT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
-        axis 0 0 1
-        anchor 1.4015 0.2277 -0.7575
+        axis 0 1 0
+        anchor 2.8030 -0.7575 0.2277
       }
       device [
         RotationalMotor {
@@ -114,8 +126,8 @@ DEF superb Robot {
         }
       ]
       endPoint Solid {
-        translation 1.4015 0.2277 -0.7575
-        rotation 1 0 0 1.5708
+        translation 2.8030 -0.7575 0.2277
+        rotation 1 0 0 -1.5708
         children [
           Shape {
             appearance PBRAppearance {
@@ -123,6 +135,13 @@ DEF superb Robot {
               roughness 0.9
             }
             geometry Cylinder { radius 0.2277 height 0.1500 }
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.9 0.9 0.9
+              roughness 0.5
+            }
+            geometry Box { size 0.4554 0.1200 0.0342 }
           }
         ]
         name "front_right_wheel"
@@ -133,8 +152,8 @@ DEF superb Robot {
 
     DEF REAR_LEFT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
-        axis 0 0 1
-        anchor -1.4015 0.2277 0.7575
+        axis 0 1 0
+        anchor 0.0000 0.7575 0.2277
       }
       device [
         RotationalMotor {
@@ -143,8 +162,8 @@ DEF superb Robot {
         }
       ]
       endPoint Solid {
-        translation -1.4015 0.2277 0.7575
-        rotation 1 0 0 1.5708
+        translation 0.0000 0.7575 0.2277
+        rotation 1 0 0 -1.5708
         children [
           Shape {
             appearance PBRAppearance {
@@ -152,6 +171,13 @@ DEF superb Robot {
               roughness 0.9
             }
             geometry Cylinder { radius 0.2277 height 0.1500 }
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.9 0.9 0.9
+              roughness 0.5
+            }
+            geometry Box { size 0.4554 0.1200 0.0342 }
           }
         ]
         name "rear_left_wheel"
@@ -162,8 +188,8 @@ DEF superb Robot {
 
     DEF REAR_RIGHT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
-        axis 0 0 1
-        anchor -1.4015 0.2277 -0.7575
+        axis 0 1 0
+        anchor 0.0000 -0.7575 0.2277
       }
       device [
         RotationalMotor {
@@ -172,8 +198,8 @@ DEF superb Robot {
         }
       ]
       endPoint Solid {
-        translation -1.4015 0.2277 -0.7575
-        rotation 1 0 0 1.5708
+        translation 0.0000 -0.7575 0.2277
+        rotation 1 0 0 -1.5708
         children [
           Shape {
             appearance PBRAppearance {
@@ -181,6 +207,13 @@ DEF superb Robot {
               roughness 0.9
             }
             geometry Cylinder { radius 0.2277 height 0.1500 }
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.9 0.9 0.9
+              roughness 0.5
+            }
+            geometry Box { size 0.4554 0.1200 0.0342 }
           }
         ]
         name "rear_right_wheel"
@@ -191,12 +224,15 @@ DEF superb Robot {
 
   ]
 
-  boundingObject Box { size 4.8030 1.4690 1.7650 }
+  boundingObject Transform {
+    translation 1.4015 0.0000 0.9622
+    children [ Box { size 4.8030 1.7650 1.4690 } ]
+  }
 
   physics Physics {
     density -1
     mass 1450
-    centerOfMass [ 0 -0.1469 0 ]
+    centerOfMass [ 1.4015 0.0000 0.8153 ]
   }
 
   controller "<extern>"
