@@ -45,6 +45,11 @@ class VCONPublisher(Node):
         self.vcon.vehicle_dimensions.wheelbase = float(dims['wheelbase'])
         self.vcon.vehicle_dimensions.track_width = float(dims['track_width'])
 
+        self.vcon.wheel_dimensions.wheel_radius = float(dims['wheel_dimensions']['wheel_radius'])
+        self.vcon.wheel_dimensions.tire_width = float(dims['wheel_dimensions']['tire_width'])
+        self.vcon.wheel_dimensions.wheel_mass = float(dims['wheel_dimensions']['wheel_mass'])
+        self.vcon.wheel_dimensions.ticks_per_revolution = float(dims['wheel_dimensions']['ticks_per_revolution'])
+
     def run(self):       
 
         self.vcon_publisher.publish(self.vcon)

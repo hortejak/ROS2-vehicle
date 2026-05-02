@@ -32,6 +32,11 @@ void VCONPublisher::load_vehicle_config()
         vcon_msg_.vehicle_dimensions.wheelbase = config["vehicle"]["dimensions"]["wheelbase"].as<double>();
         vcon_msg_.vehicle_dimensions.track_width = config["vehicle"]["dimensions"]["track_width"].as<double>();
 
+        vcon_msg_.wheel_dimensions.wheel_radius = config["vehicle"]["dimensions"]["wheel_dimensions"]["wheel_radius"].as<double>();
+        vcon_msg_.wheel_dimensions.tire_width = config["vehicle"]["dimensions"]["wheel_dimensions"]["tire_width"].as<double>();
+        vcon_msg_.wheel_dimensions.wheel_mass = config["vehicle"]["dimensions"]["wheel_dimensions"]["wheel_mass"].as<double>();
+        vcon_msg_.wheel_dimensions.ticks_per_revolution = config["vehicle"]["dimensions"]["wheel_dimensions"]["ticks_per_revolution"].as<double>();
+
         RCLCPP_INFO(this->get_logger(), "Loaded config for: %s", vcon_msg_.name.c_str());
     } 
     catch (const std::exception & e) {

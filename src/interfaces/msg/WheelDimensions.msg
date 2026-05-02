@@ -1,0 +1,4 @@
+float64 wheel_radius
+float64 tire_width
+uint32 ticks_per_revolution
+float64 wheel_mass
