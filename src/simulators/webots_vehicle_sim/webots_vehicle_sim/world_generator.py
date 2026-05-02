@@ -21,16 +21,18 @@ WORLD_OUTPUT_PATH = os.path.expanduser(
 )
 
 
-def generate_world(dims) -> str:
+def generate_world(msg) -> str:
 
-    length      = dims.length
-    width       = dims.width
-    height      = dims.height
-    wheelbase   = dims.wheelbase
-    track_width = dims.track_width
+    length      = msg.vehicle_dimensions.length
+    width       = msg.vehicle_dimensions.width
+    height      = msg.vehicle_dimensions.height
+    wheelbase   = msg.vehicle_dimensions.wheelbase
+    track_width = msg.vehicle_dimensions.track_width
 
-    wheel_radius    = height * 0.155
-    wheel_thickness = width  * 0.085
+    wheel_radius    = msg.wheel_dimensions.wheel_radius
+    wheel_thickness = msg.wheel_dimensions.tire_width
+    wheel_mass      = msg.wheel_dimensions.wheel_mass
+    ticks_per_revolution = msg.wheel_dimensions.ticks_per_revolution
 
     front_axle_x = wheelbase
     front_axle_y = 0
@@ -108,8 +110,7 @@ def generate_world(dims) -> str:
         '#VRML_SIM R2025a utf8\n'
         'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/StraightRoadSegment.proto"\n'
         'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/RoadLine.proto"\n'
-        'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/floors/protos/RectangleArena.proto"\n'
-        'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/appearances/protos/Asphalt.proto"\n'
+        'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/floors/protos/Floor.proto"\n'
         '\n'
         'WorldInfo {\n'
         '  title "Vehicle Simulation"\n'
@@ -120,7 +121,7 @@ def generate_world(dims) -> str:
         'Viewpoint {\n'
         '  orientation 0 1 0 0.221\n'
         '  position -50 0 15\n'
-        '  follow "Skoda Superb Mk1"\n'
+        '  follow "Skoda_Superb_Mk1"\n'
         '  followType "Tracking Shot"\n'
         '}\n'
         '\n'
@@ -141,11 +142,9 @@ def generate_world(dims) -> str:
         '  intensity 1\n'
         '}\n'
         '\n'
-        'RectangleArena {\n'
-        '  floorSize 500 500\n'
-        '  floorTileSize 500 500\n'
-        '  floorAppearance Asphalt {}\n'
-        '  wallHeight 0.1\n'
+        'Floor {\n'
+        '  translation 0 0 0\n'
+        '  size 500 500\n'
         '}\n'
         '\n'
         'StraightRoadSegment {\n'
@@ -162,13 +161,13 @@ def generate_world(dims) -> str:
         '    }\n'
         '  ]\n'
         '  length 200\n'
-        '  roadBoundingObject FALSE\n'
+        '  roadBoundingObject TRUE\n'
         '}\n'
         '\n'
         'DEF superb Robot {\n'
         '  translation 0 0 0\n'
         '  rotation 0 0 1 0\n'
-        '  name "Skoda Superb Mk1"\n'
+        '  name "Skoda_Superb_Mk1"\n'
         '  children [\n'
         '\n'
         f'    Transform {{\n'
@@ -346,6 +345,18 @@ def generate_world(dims) -> str:
         '      ]\n'
         '    }\n'
         '\n'
+        '    GPS {\n'
+        '      name "gps"\n'
+        '    }\n'
+        '    InertialUnit {\n'
+        '      name "inertial_unit"\n'
+        '    }\n'
+        '    Gyro {\n'
+        '      name "gyro"\n'
+        '    }\n'
+        '    Accelerometer {\n'
+        '      name "accelerometer"\n'
+        '    }\n'
         '    DEF FRONT_LEFT_WHEEL HingeJoint {\n'
         '      jointParameters HingeJointParameters {\n'
         '        axis 0 1 0\n'
@@ -355,6 +366,9 @@ def generate_world(dims) -> str:
         '        RotationalMotor {\n'
         '          name "front_left_motor"\n'
         '          maxVelocity 100\n'
+        '        }\n'
+        '        PositionSensor {\n'
+        '          name "front_left_sensor"\n'
         '        }\n'
         '      ]\n'
         '      endPoint Solid {\n'
@@ -378,7 +392,7 @@ def generate_world(dims) -> str:
         '        ]\n'
         '        name "front_left_wheel"\n'
         f'        boundingObject Cylinder {{ radius {wheel_radius:.4f} height {wheel_thickness:.4f} }}\n'
-        '        physics Physics { density -1 mass 12 }\n'
+        f'        physics Physics {{ density -1 mass {wheel_mass:.2f} }}\n'
         '      }\n'
         '    }\n'
         '\n'
@@ -391,6 +405,9 @@ def generate_world(dims) -> str:
         '        RotationalMotor {\n'
         '          name "front_right_motor"\n'
         '          maxVelocity 100\n'
+        '        }\n'
+        '        PositionSensor {\n'
+        '          name "front_right_sensor"\n'
         '        }\n'
         '      ]\n'
         '      endPoint Solid {\n'
@@ -414,7 +431,7 @@ def generate_world(dims) -> str:
         '        ]\n'
         '        name "front_right_wheel"\n'
         f'        boundingObject Cylinder {{ radius {wheel_radius:.4f} height {wheel_thickness:.4f} }}\n'
-        '        physics Physics { density -1 mass 12 }\n'
+        f'        physics Physics {{ density -1 mass {wheel_mass:.2f} }}\n'
         '      }\n'
         '    }\n'
         '\n'
@@ -427,6 +444,9 @@ def generate_world(dims) -> str:
         '        RotationalMotor {\n'
         '          name "rear_left_motor"\n'
         '          maxVelocity 100\n'
+        '        }\n'
+        '        PositionSensor {\n'
+        '          name "rear_left_sensor"\n'
         '        }\n'
         '      ]\n'
         '      endPoint Solid {\n'
@@ -450,7 +470,7 @@ def generate_world(dims) -> str:
         '        ]\n'
         '        name "rear_left_wheel"\n'
         f'        boundingObject Cylinder {{ radius {wheel_radius:.4f} height {wheel_thickness:.4f} }}\n'
-        '        physics Physics { density -1 mass 12 }\n'
+        f'        physics Physics {{ density -1 mass {wheel_mass:.2f} }}\n'
         '      }\n'
         '    }\n'
         '\n'
@@ -463,6 +483,9 @@ def generate_world(dims) -> str:
         '        RotationalMotor {\n'
         '          name "rear_right_motor"\n'
         '          maxVelocity 100\n'
+        '        }\n'
+        '        PositionSensor {\n'
+        '          name "rear_right_sensor"\n'
         '        }\n'
         '      ]\n'
         '      endPoint Solid {\n'
@@ -486,7 +509,7 @@ def generate_world(dims) -> str:
         '        ]\n'
         '        name "rear_right_wheel"\n'
         f'        boundingObject Cylinder {{ radius {wheel_radius:.4f} height {wheel_thickness:.4f} }}\n'
-        '        physics Physics { density -1 mass 12 }\n'
+        f'        physics Physics {{ density -1 mass {wheel_mass:.2f} }}\n'
         '      }\n'
         '    }\n'
         '\n'
@@ -530,15 +553,18 @@ class WorldGeneratorNode(Node):
             return
 
         self._generated = True
-        dims = msg.vehicle_dimensions
+        veh_dims = msg.vehicle_dimensions
+        wheel_dims = msg.wheel_dimensions
 
         self.get_logger().info(
             f'Received VCON: "{msg.name}" id={msg.id} | '
-            f'L={dims.length:.3f} W={dims.width:.3f} H={dims.height:.3f} | '
-            f'WB={dims.wheelbase:.3f} TW={dims.track_width:.3f}'
+            f'L={veh_dims.length:.3f} W={veh_dims.width:.3f} H={veh_dims.height:.3f} | '
+            f'WB={veh_dims.wheelbase:.3f} TW={veh_dims.track_width:.3f} | '
+            f'WR={wheel_dims.wheel_radius:.3f} TW={wheel_dims.tire_width:.3f} | '
+            f'WM={wheel_dims.wheel_mass:.3f} TR={wheel_dims.ticks_per_revolution}'
         )
 
-        world_content = generate_world(dims)
+        world_content = generate_world(msg)
 
         os.makedirs(os.path.dirname(WORLD_OUTPUT_PATH), exist_ok=True)
         with open(WORLD_OUTPUT_PATH, 'w') as f:

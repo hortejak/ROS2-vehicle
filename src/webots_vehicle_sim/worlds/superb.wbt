@@ -1,8 +1,7 @@
 #VRML_SIM R2025a utf8
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/StraightRoadSegment.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/RoadLine.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/floors/protos/RectangleArena.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/appearances/protos/Asphalt.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/floors/protos/Floor.proto"
 
 WorldInfo {
   title "Vehicle Simulation"
@@ -13,7 +12,7 @@ WorldInfo {
 Viewpoint {
   orientation 0 1 0 0.221
   position -50 0 15
-  follow "Skoda Superb Mk1"
+  follow "Skoda_Superb_Mk1"
   followType "Tracking Shot"
 }
 
@@ -34,11 +33,9 @@ DirectionalLight {
   intensity 1
 }
 
-RectangleArena {
-  floorSize 500 500
-  floorTileSize 500 500
-  floorAppearance Asphalt {}
-  wallHeight 0.1
+Floor {
+  translation 0 0 0
+  size 500 500
 }
 
 StraightRoadSegment {
@@ -55,17 +52,17 @@ StraightRoadSegment {
     }
   ]
   length 200
-  roadBoundingObject FALSE
+  roadBoundingObject TRUE
 }
 
 DEF superb Robot {
   translation 0 0 0
   rotation 0 0 1 0
-  name "Skoda Superb Mk1"
+  name "Skoda_Superb_Mk1"
   children [
 
     Transform {
-      translation 1.4015 0 0.6684
+      translation 1.4015 0 0.7567
       children [
         Shape {
           appearance PBRAppearance {
@@ -79,7 +76,7 @@ DEF superb Robot {
     }
 
     Transform {
-      translation 1.0427 0 1.4029
+      translation 1.0427 0 1.4912
       children [
         Shape {
           appearance PBRAppearance {
@@ -93,7 +90,7 @@ DEF superb Robot {
     }
 
     Transform {
-      translation 2.1798 0 1.4029
+      translation 2.1798 0 1.4912
       rotation 0 1 0 -0.8330
       children [
         Shape {
@@ -109,7 +106,7 @@ DEF superb Robot {
     }
 
     Transform {
-      translation -0.0356 0 1.4029
+      translation -0.0356 0 1.4912
       rotation 0 1 0 0.7328
       children [
         Shape {
@@ -133,18 +130,18 @@ DEF superb Robot {
       geometry IndexedFaceSet {
         coord Coordinate {
           point [
-            2.5030 0.7943 1.1091
-            1.8566  0.7943 1.1091
-            1.8566  0.7943 1.6967
-            2.5030 -0.7943 1.1091
-            1.8566  -0.7943 1.1091
-            1.8566  -0.7943 1.6967
-            -0.3000  0.7943 1.1091
-            0.2288   0.7943 1.1091
-            0.2288   0.7943 1.6967
-            -0.3000  -0.7943 1.1091
-            0.2288   -0.7943 1.1091
-            0.2288   -0.7943 1.6967
+            2.5030 0.7943 1.1974
+            1.8566  0.7943 1.1974
+            1.8566  0.7943 1.7850
+            2.5030 -0.7943 1.1974
+            1.8566  -0.7943 1.1974
+            1.8566  -0.7943 1.7850
+            -0.3000  0.7943 1.1974
+            0.2288   0.7943 1.1974
+            0.2288   0.7943 1.7850
+            -0.3000  -0.7943 1.1974
+            0.2288   -0.7943 1.1974
+            0.2288   -0.7943 1.7850
           ]
         }
         coordIndex [
@@ -157,7 +154,7 @@ DEF superb Robot {
     }
 
     Transform {
-      translation 3.7430 0.7236 0.8006
+      translation 3.7430 0.7236 0.8889
       children [
         Shape {
           appearance PBRAppearance {
@@ -171,7 +168,7 @@ DEF superb Robot {
       ]
     }
     Transform {
-      translation 3.7430 -0.7236 0.8006
+      translation 3.7430 -0.7236 0.8889
       children [
         Shape {
           appearance PBRAppearance {
@@ -186,7 +183,7 @@ DEF superb Robot {
     }
 
     Transform {
-      translation -0.9400 0.7236 0.8006
+      translation -0.9400 0.7236 0.8889
       children [
         Shape {
           appearance PBRAppearance {
@@ -200,7 +197,7 @@ DEF superb Robot {
       ]
     }
     Transform {
-      translation -0.9400 -0.7236 0.8006
+      translation -0.9400 -0.7236 0.8889
       children [
         Shape {
           appearance PBRAppearance {
@@ -215,7 +212,7 @@ DEF superb Robot {
     }
 
     Transform {
-      translation 2.5030 0.9266 1.1605
+      translation 2.5030 0.9266 1.2488
       children [
         Shape {
           appearance PBRAppearance {
@@ -227,7 +224,7 @@ DEF superb Robot {
       ]
     }
     Transform {
-      translation 2.5030 -0.9266 1.1605
+      translation 2.5030 -0.9266 1.2488
       children [
         Shape {
           appearance PBRAppearance {
@@ -239,19 +236,34 @@ DEF superb Robot {
       ]
     }
 
+    GPS {
+      name "gps"
+    }
+    InertialUnit {
+      name "inertial_unit"
+    }
+    Gyro {
+      name "gyro"
+    }
+    Accelerometer {
+      name "accelerometer"
+    }
     DEF FRONT_LEFT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
         axis 0 1 0
-        anchor 2.8030 0.7575 0.2277
+        anchor 2.8030 0.7575 0.3160
       }
       device [
         RotationalMotor {
           name "front_left_motor"
           maxVelocity 100
         }
+        PositionSensor {
+          name "front_left_sensor"
+        }
       ]
       endPoint Solid {
-        translation 2.8030 0.7575 0.2277
+        translation 2.8030 0.7575 0.3160
         rotation 1 0 0 -1.5708
         children [
           Shape {
@@ -259,35 +271,38 @@ DEF superb Robot {
               baseColor 0.1 0.1 0.1
               roughness 0.9
             }
-            geometry Cylinder { radius 0.2277 height 0.1500 }
+            geometry Cylinder { radius 0.3160 height 0.2050 }
           }
           Shape {
             appearance PBRAppearance {
               baseColor 0.9 0.9 0.9
               roughness 0.5
             }
-            geometry Box { size 0.4554 0.1200 0.0342 }
+            geometry Box { size 0.6320 0.1640 0.0474 }
           }
         ]
         name "front_left_wheel"
-        boundingObject Cylinder { radius 0.2277 height 0.1500 }
-        physics Physics { density -1 mass 12 }
+        boundingObject Cylinder { radius 0.3160 height 0.2050 }
+        physics Physics { density -1 mass 18.00 }
       }
     }
 
     DEF FRONT_RIGHT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
         axis 0 1 0
-        anchor 2.8030 -0.7575 0.2277
+        anchor 2.8030 -0.7575 0.3160
       }
       device [
         RotationalMotor {
           name "front_right_motor"
           maxVelocity 100
         }
+        PositionSensor {
+          name "front_right_sensor"
+        }
       ]
       endPoint Solid {
-        translation 2.8030 -0.7575 0.2277
+        translation 2.8030 -0.7575 0.3160
         rotation 1 0 0 -1.5708
         children [
           Shape {
@@ -295,35 +310,38 @@ DEF superb Robot {
               baseColor 0.1 0.1 0.1
               roughness 0.9
             }
-            geometry Cylinder { radius 0.2277 height 0.1500 }
+            geometry Cylinder { radius 0.3160 height 0.2050 }
           }
           Shape {
             appearance PBRAppearance {
               baseColor 0.9 0.9 0.9
               roughness 0.5
             }
-            geometry Box { size 0.4554 0.1200 0.0342 }
+            geometry Box { size 0.6320 0.1640 0.0474 }
           }
         ]
         name "front_right_wheel"
-        boundingObject Cylinder { radius 0.2277 height 0.1500 }
-        physics Physics { density -1 mass 12 }
+        boundingObject Cylinder { radius 0.3160 height 0.2050 }
+        physics Physics { density -1 mass 18.00 }
       }
     }
 
     DEF REAR_LEFT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
         axis 0 1 0
-        anchor 0.0000 0.7575 0.2277
+        anchor 0.0000 0.7575 0.3160
       }
       device [
         RotationalMotor {
           name "rear_left_motor"
           maxVelocity 100
         }
+        PositionSensor {
+          name "rear_left_sensor"
+        }
       ]
       endPoint Solid {
-        translation 0.0000 0.7575 0.2277
+        translation 0.0000 0.7575 0.3160
         rotation 1 0 0 -1.5708
         children [
           Shape {
@@ -331,35 +349,38 @@ DEF superb Robot {
               baseColor 0.1 0.1 0.1
               roughness 0.9
             }
-            geometry Cylinder { radius 0.2277 height 0.1500 }
+            geometry Cylinder { radius 0.3160 height 0.2050 }
           }
           Shape {
             appearance PBRAppearance {
               baseColor 0.9 0.9 0.9
               roughness 0.5
             }
-            geometry Box { size 0.4554 0.1200 0.0342 }
+            geometry Box { size 0.6320 0.1640 0.0474 }
           }
         ]
         name "rear_left_wheel"
-        boundingObject Cylinder { radius 0.2277 height 0.1500 }
-        physics Physics { density -1 mass 12 }
+        boundingObject Cylinder { radius 0.3160 height 0.2050 }
+        physics Physics { density -1 mass 18.00 }
       }
     }
 
     DEF REAR_RIGHT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
         axis 0 1 0
-        anchor 0.0000 -0.7575 0.2277
+        anchor 0.0000 -0.7575 0.3160
       }
       device [
         RotationalMotor {
           name "rear_right_motor"
           maxVelocity 100
         }
+        PositionSensor {
+          name "rear_right_sensor"
+        }
       ]
       endPoint Solid {
-        translation 0.0000 -0.7575 0.2277
+        translation 0.0000 -0.7575 0.3160
         rotation 1 0 0 -1.5708
         children [
           Shape {
@@ -367,33 +388,33 @@ DEF superb Robot {
               baseColor 0.1 0.1 0.1
               roughness 0.9
             }
-            geometry Cylinder { radius 0.2277 height 0.1500 }
+            geometry Cylinder { radius 0.3160 height 0.2050 }
           }
           Shape {
             appearance PBRAppearance {
               baseColor 0.9 0.9 0.9
               roughness 0.5
             }
-            geometry Box { size 0.4554 0.1200 0.0342 }
+            geometry Box { size 0.6320 0.1640 0.0474 }
           }
         ]
         name "rear_right_wheel"
-        boundingObject Cylinder { radius 0.2277 height 0.1500 }
-        physics Physics { density -1 mass 12 }
+        boundingObject Cylinder { radius 0.3160 height 0.2050 }
+        physics Physics { density -1 mass 18.00 }
       }
     }
 
   ]
 
   boundingObject Transform {
-    translation 1.4015 0.0000 0.9622
+    translation 1.4015 0.0000 1.0505
     children [ Box { size 4.8030 1.7650 1.4690 } ]
   }
 
   physics Physics {
     density -1
     mass 1450
-    centerOfMass [ 1.4015 0.0000 0.8153 ]
+    centerOfMass [ 1.4015 0.0000 0.9036 ]
   }
 
   controller "<extern>"

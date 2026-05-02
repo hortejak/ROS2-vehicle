@@ -16,6 +16,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/VehicleDimensions.msg"
   "msg/WheelDimensions.msg"
+  "msg/WheelTicks.msg"
   "msg/KinematicState.msg"
   "msg/KinematicInput.msg"  
   "msg/VCON.msg"
