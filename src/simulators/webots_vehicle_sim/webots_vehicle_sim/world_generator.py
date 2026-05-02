@@ -6,6 +6,7 @@ generates a Webots .wbt world file with correct vehicle dimensions,
 then launches Webots with that world file.
 """
 
+import math
 import os
 import subprocess
 import sys
@@ -45,6 +46,61 @@ def generate_world(dims) -> str:
 
     left_y  =  track_width / 2.0
     right_y = -track_width / 2.0
+
+    # sedan 3-box silhouette
+    body_h  = height * 0.6                          # lower chassis height
+    cabin_h = height * 0.4                         # cabin (passenger cell) height
+    cabin_l = length * 0.44                          # cabin length
+    cabin_w = width  * 0.90                          # cabin slightly narrower than body
+    cabin_x = cog_x - length * 0.06                 # cabin biased slightly rearward
+    body_z  = wheel_radius + body_h  / 2
+    cabin_z = wheel_radius + body_h  + cabin_h / 2
+
+    # lights (flush with front / rear face)
+    ll_x  = length * 0.025                          # light depth (X)
+    ll_y  = width  * 0.18                           # light width (Y)
+    ll_z  = height * 0.09                           # light height (Z)
+    fl_x  = cog_x + length / 2 - ll_x / 2          # front light center X
+    rl_x  = cog_x - length / 2 + ll_x / 2          # rear  light center X
+    lgt_z = wheel_radius + body_h * 0.65            # light center Z
+    lgt_y = width / 2 - ll_y / 2                    # light center |Y| (outer edge)
+
+    # windshields — slope expressed as dx/dz (horizontal set-back per unit rise)
+    ws_slope  = 1.1                                     # front windshield (from vertical)
+    rw_slope  = 0.9                                   # rear window  (from vertical)
+    ws_dx     = cabin_h * ws_slope                       # horizontal set-back of top vs bottom
+    rw_dx     = cabin_h * rw_slope
+    ws_slant  = cabin_h / math.cos(math.atan(ws_slope))  # true slant height
+    rw_slant  = cabin_h / math.cos(math.atan(rw_slope))
+    ws_angle  = -math.atan(ws_slope)                     # rotation around Y (neg = top rearward)
+    rw_angle  =  math.atan(rw_slope)                     # rotation around Y (pos = top forward)
+    cabin_offset = -0.30                                 # shift whole cabin rearward
+
+    # windshield bottoms shifted by cabin_offset
+    ws_bot_x  = front_axle_x + cabin_offset             # windshield bottom X
+    rw_bot_x  = rear_axle_x  + cabin_offset             # rear window bottom X
+    ws_x      = ws_bot_x - ws_dx / 2                    # windshield center X
+    rw_x      = rw_bot_x + rw_dx / 2                    # rear window center X
+    ws_thick  = 0.025                                    # panel thickness
+
+    # cabin box spans exactly between the two windshield tops
+    cabin_vis_l = wheelbase - ws_dx - rw_dx
+    cabin_vis_x = (wheelbase + rw_dx - ws_dx) / 2 + cabin_offset
+
+    # pillar triangle fill geometry
+    body_top    = wheel_radius + body_h
+    cabin_top   = body_top + cabin_h
+    cabin_frt_x = ws_bot_x - ws_dx    # cabin front face X = windshield top X
+    cabin_rr_x  = rw_bot_x + rw_dx   # cabin rear  face X = rear-window top X
+    hy          = cabin_w / 2         # half cabin width
+
+    # side mirrors — mounted at A-pillar, beltline height
+    mir_lx = width * 0.09      # ~16 cm in forward direction
+    mir_ly = width * 0.05      # ~9 cm sticking out
+    mir_lz = height * 0.07     # ~10 cm tall
+    mir_x  = ws_bot_x          # at A-pillar / windshield base
+    mir_y  = width / 2 + mir_ly / 2
+    mir_z  = body_top + mir_lz / 2   # flush with body-cabin junction
 
     r,  g,  b  = 0.13, 0.25, 0.13
 
@@ -116,15 +172,176 @@ def generate_world(dims) -> str:
         '  children [\n'
         '\n'
         f'    Transform {{\n'
-        f'      translation {cog_x:.4f} {cog_y:.4f} {cog_z:.4f}\n'
+        f'      translation {cog_x:.4f} 0 {body_z:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        f'            baseColor {r} {g} {b}\n'
+        '            roughness 0.5\n'
+        '            metalness 0.5\n'
+        '          }\n'
+        f'          geometry Box {{ size {length:.4f} {width:.4f} {body_h:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        '\n'
+        f'    Transform {{\n'
+        f'      translation {cabin_vis_x:.4f} 0 {cabin_z:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        f'            baseColor {r*0.85:.3f} {g*0.85:.3f} {b*0.85:.3f}\n'
+        '            roughness 0.2\n'
+        '            metalness 0.8\n'
+        '          }\n'
+        f'          geometry Box {{ size {cabin_vis_l:.4f} {cabin_w:.4f} {cabin_h:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        '\n'
+        f'    Transform {{\n'
+        f'      translation {ws_x:.4f} 0 {cabin_z:.4f}\n'
+        f'      rotation 0 1 0 {ws_angle:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        '            baseColor 0.4 0.55 0.7\n'
+        '            transparency 0.45\n'
+        '            roughness 0.05\n'
+        '            metalness 0.1\n'
+        '          }\n'
+        f'          geometry Box {{ size {ws_thick:.4f} {cabin_w:.4f} {ws_slant:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        '\n'
+        f'    Transform {{\n'
+        f'      translation {rw_x:.4f} 0 {cabin_z:.4f}\n'
+        f'      rotation 0 1 0 {rw_angle:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        '            baseColor 0.4 0.55 0.7\n'
+        '            transparency 0.45\n'
+        '            roughness 0.05\n'
+        '            metalness 0.1\n'
+        '          }\n'
+        f'          geometry Box {{ size {ws_thick:.4f} {cabin_w:.4f} {rw_slant:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        '\n'
+        f'    Shape {{\n'
+        f'      appearance PBRAppearance {{\n'
+        f'        baseColor {r*0.85:.3f} {g*0.85:.3f} {b*0.85:.3f}\n'
+        f'        roughness 0.2\n'
+        f'        metalness 0.8\n'
+        f'      }}\n'
+        f'      geometry IndexedFaceSet {{\n'
+        f'        coord Coordinate {{\n'
+        f'          point [\n'
+        f'            {ws_bot_x:.4f} { hy:.4f} {body_top:.4f}\n'
+        f'            {cabin_frt_x:.4f}  { hy:.4f} {body_top:.4f}\n'
+        f'            {cabin_frt_x:.4f}  { hy:.4f} {cabin_top:.4f}\n'
+        f'            {ws_bot_x:.4f} {-hy:.4f} {body_top:.4f}\n'
+        f'            {cabin_frt_x:.4f}  {-hy:.4f} {body_top:.4f}\n'
+        f'            {cabin_frt_x:.4f}  {-hy:.4f} {cabin_top:.4f}\n'
+        f'            {rw_bot_x:.4f}  { hy:.4f} {body_top:.4f}\n'
+        f'            {cabin_rr_x:.4f}   { hy:.4f} {body_top:.4f}\n'
+        f'            {cabin_rr_x:.4f}   { hy:.4f} {cabin_top:.4f}\n'
+        f'            {rw_bot_x:.4f}  {-hy:.4f} {body_top:.4f}\n'
+        f'            {cabin_rr_x:.4f}   {-hy:.4f} {body_top:.4f}\n'
+        f'            {cabin_rr_x:.4f}   {-hy:.4f} {cabin_top:.4f}\n'
+        f'          ]\n'
+        f'        }}\n'
+        f'        coordIndex [\n'
+        f'          0 1 2 -1\n'
+        f'          3 5 4 -1\n'
+        f'          6 8 7 -1\n'
+        f'          9 10 11 -1\n'
+        f'        ]\n'
+        f'      }}\n'
+        f'    }}\n'
+        '\n'
+        f'    Transform {{\n'
+        f'      translation {fl_x:.4f} {lgt_y:.4f} {lgt_z:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        '            baseColor 1.0 1.0 0.8\n'
+        '            roughness 0.05\n'
+        '            metalness 0.0\n'
+        '            emissiveColor 0.6 0.6 0.3\n'
+        '          }\n'
+        f'          geometry Box {{ size {ll_x:.4f} {ll_y:.4f} {ll_z:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        f'    Transform {{\n'
+        f'      translation {fl_x:.4f} {-lgt_y:.4f} {lgt_z:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        '            baseColor 1.0 1.0 0.8\n'
+        '            roughness 0.05\n'
+        '            metalness 0.0\n'
+        '            emissiveColor 0.6 0.6 0.3\n'
+        '          }\n'
+        f'          geometry Box {{ size {ll_x:.4f} {ll_y:.4f} {ll_z:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        '\n'
+        f'    Transform {{\n'
+        f'      translation {rl_x:.4f} {lgt_y:.4f} {lgt_z:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        '            baseColor 0.8 0.05 0.05\n'
+        '            roughness 0.05\n'
+        '            metalness 0.0\n'
+        '            emissiveColor 0.4 0.0 0.0\n'
+        '          }\n'
+        f'          geometry Box {{ size {ll_x:.4f} {ll_y:.4f} {ll_z:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        f'    Transform {{\n'
+        f'      translation {rl_x:.4f} {-lgt_y:.4f} {lgt_z:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        '            baseColor 0.8 0.05 0.05\n'
+        '            roughness 0.05\n'
+        '            metalness 0.0\n'
+        '            emissiveColor 0.4 0.0 0.0\n'
+        '          }\n'
+        f'          geometry Box {{ size {ll_x:.4f} {ll_y:.4f} {ll_z:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        '\n'
+        f'    Transform {{\n'
+        f'      translation {mir_x:.4f} {mir_y:.4f} {mir_z:.4f}\n'
         '      children [\n'
         '        Shape {\n'
         '          appearance PBRAppearance {\n'
         f'            baseColor {r} {g} {b}\n'
         '            roughness 0.4\n'
-        '            metalness 0.6\n'
         '          }\n'
-        f'          geometry Box {{ size {length:.4f} {width:.4f} {height:.4f} }}\n'
+        f'          geometry Box {{ size {mir_lx:.4f} {mir_ly:.4f} {mir_lz:.4f} }}\n'
+        '        }\n'
+        '      ]\n'
+        '    }\n'
+        f'    Transform {{\n'
+        f'      translation {mir_x:.4f} {-mir_y:.4f} {mir_z:.4f}\n'
+        '      children [\n'
+        '        Shape {\n'
+        '          appearance PBRAppearance {\n'
+        f'            baseColor {r} {g} {b}\n'
+        '            roughness 0.4\n'
+        '          }\n'
+        f'          geometry Box {{ size {mir_lx:.4f} {mir_ly:.4f} {mir_lz:.4f} }}\n'
         '        }\n'
         '      ]\n'
         '    }\n'
