@@ -20,6 +20,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/KinematicState.msg"
   "msg/KinematicInput.msg"  
   "msg/VCON.msg"
+  "msg/SimulationVehicleCmd.msg"
 )
 
 ament_export_dependencies(rosidl_default_runtime)

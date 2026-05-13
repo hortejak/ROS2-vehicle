@@ -20,5 +20,6 @@
             <accelerometerName>accelerometer</accelerometerName>
         </plugin>
         <plugin type="webots_vehicle_sim.wheel_encoder_plugin.WheelEncoderPlugin"/>
+        <plugin type="webots_vehicle_sim.vehicle_controller_plugin.VehicleControllerPlugin"/>
     </webots>
 </robot>

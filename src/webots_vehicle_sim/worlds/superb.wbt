@@ -5,10 +5,14 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/proje
 
 WorldInfo {
   title "Vehicle Simulation"
-  basicTimeStep 16
+  basicTimeStep 32
   coordinateSystem "ENU"
+  contactProperties [
+    ContactProperties {
+      coulombFriction [ 0.7 ]
+    }
+  ]
 }
-
 Viewpoint {
   orientation 0 1 0 0.221
   position -50 0 15
@@ -36,6 +40,7 @@ DirectionalLight {
 Floor {
   translation 0 0 0
   size 500 500
+  contactMaterial "ground"
 }
 
 StraightRoadSegment {
@@ -248,84 +253,144 @@ DEF superb Robot {
     Accelerometer {
       name "accelerometer"
     }
-    DEF FRONT_LEFT_WHEEL HingeJoint {
+    DEF FRONT_LEFT_STEER HingeJoint {
       jointParameters HingeJointParameters {
-        axis 0 1 0
+        axis 0 0 1
         anchor 2.8030 0.7575 0.3160
       }
       device [
         RotationalMotor {
-          name "front_left_motor"
-          maxVelocity 100
+          name "front_left_steer"
+          maxPosition 0.5236
+          minPosition -0.5236
+          maxVelocity 1.0
+          maxTorque 1000.0
         }
         PositionSensor {
-          name "front_left_sensor"
+          name "front_left_steer_sensor"
         }
       ]
       endPoint Solid {
         translation 2.8030 0.7575 0.3160
-        rotation 1 0 0 -1.5708
+        name "front_left_knuckle"
+        boundingObject Sphere { radius 0.05 }
+        physics Physics { density -1 mass 1.0 }
         children [
-          Shape {
-            appearance PBRAppearance {
-              baseColor 0.1 0.1 0.1
-              roughness 0.9
+          DEF FRONT_LEFT_WHEEL HingeJoint {
+            jointParameters HingeJointParameters {
+              axis 0 1 0
+              anchor 0 0 0
             }
-            geometry Cylinder { radius 0.3160 height 0.2050 }
-          }
-          Shape {
-            appearance PBRAppearance {
-              baseColor 0.9 0.9 0.9
-              roughness 0.5
+            device [
+              RotationalMotor {
+                name "front_left_motor"
+                maxVelocity 100
+               maxTorque 2100
+              }
+              Brake {
+                name "front_left_brake"
+              }
+              PositionSensor {
+                name "front_left_sensor"
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 0
+              rotation 1 0 0 -1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.1 0.1 0.1
+                    roughness 0.9
+                  }
+                  geometry Cylinder { radius 0.3160 height 0.2050 }
+                }
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.9 0.9 0.9
+                    roughness 0.5
+                  }
+                  geometry Box { size 0.6320 0.1640 0.0474 }
+                }
+              ]
+              name "front_left_wheel"
+              contactMaterial "wheel"
+              boundingObject Cylinder { radius 0.3160 height 0.2050 }
+              physics Physics { density -1 mass 18.00 }
             }
-            geometry Box { size 0.6320 0.1640 0.0474 }
           }
         ]
-        name "front_left_wheel"
-        boundingObject Cylinder { radius 0.3160 height 0.2050 }
-        physics Physics { density -1 mass 18.00 }
       }
     }
-
-    DEF FRONT_RIGHT_WHEEL HingeJoint {
+    DEF FRONT_RIGHT_STEER HingeJoint {
       jointParameters HingeJointParameters {
-        axis 0 1 0
+        axis 0 0 1
         anchor 2.8030 -0.7575 0.3160
       }
       device [
         RotationalMotor {
-          name "front_right_motor"
-          maxVelocity 100
+          name "front_right_steer"
+          maxPosition 0.5236
+          minPosition -0.5236
+          maxVelocity 1.0
+          maxTorque 1000.0
         }
         PositionSensor {
-          name "front_right_sensor"
+          name "front_right_steer_sensor"
         }
       ]
       endPoint Solid {
         translation 2.8030 -0.7575 0.3160
-        rotation 1 0 0 -1.5708
+        name "front_right_knuckle"
+        boundingObject Sphere { radius 0.05 }
+        physics Physics { density -1 mass 1.0 }
         children [
-          Shape {
-            appearance PBRAppearance {
-              baseColor 0.1 0.1 0.1
-              roughness 0.9
+          DEF FRONT_RIGHT_WHEEL HingeJoint {
+            jointParameters HingeJointParameters {
+              axis 0 1 0
+              anchor 0 0 0
             }
-            geometry Cylinder { radius 0.3160 height 0.2050 }
-          }
-          Shape {
-            appearance PBRAppearance {
-              baseColor 0.9 0.9 0.9
-              roughness 0.5
+            device [
+              RotationalMotor {
+                name "front_right_motor"
+                maxVelocity 100
+               maxTorque 2100
+              }
+              Brake {
+                name "front_right_brake"
+              }
+              PositionSensor {
+                name "front_right_sensor"
+              }
+            ]
+            endPoint Solid {
+              translation 0 0 0
+              rotation 1 0 0 -1.5708
+              children [
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.1 0.1 0.1
+                    roughness 0.9
+                  }
+                  geometry Cylinder { radius 0.3160 height 0.2050 }
+                }
+                Shape {
+                  appearance PBRAppearance {
+                    baseColor 0.9 0.9 0.9
+                    roughness 0.5
+                  }
+                  geometry Box { size 0.6320 0.1640 0.0474 }
+                }
+              ]
+              name "front_right_wheel"
+              contactMaterial "wheel"
+              boundingObject Cylinder { radius 0.3160 height 0.2050 }
+              physics Physics { density -1 mass 18.00 }
             }
-            geometry Box { size 0.6320 0.1640 0.0474 }
           }
         ]
-        name "front_right_wheel"
-        boundingObject Cylinder { radius 0.3160 height 0.2050 }
-        physics Physics { density -1 mass 18.00 }
       }
     }
-
     DEF REAR_LEFT_WHEEL HingeJoint {
       jointParameters HingeJointParameters {
         axis 0 1 0
@@ -335,6 +400,9 @@ DEF superb Robot {
         RotationalMotor {
           name "rear_left_motor"
           maxVelocity 100
+        }
+        Brake {
+          name "rear_left_brake"
         }
         PositionSensor {
           name "rear_left_sensor"
@@ -360,6 +428,7 @@ DEF superb Robot {
           }
         ]
         name "rear_left_wheel"
+        contactMaterial "wheel"
         boundingObject Cylinder { radius 0.3160 height 0.2050 }
         physics Physics { density -1 mass 18.00 }
       }
@@ -374,6 +443,9 @@ DEF superb Robot {
         RotationalMotor {
           name "rear_right_motor"
           maxVelocity 100
+        }
+        Brake {
+          name "rear_right_brake"
         }
         PositionSensor {
           name "rear_right_sensor"
@@ -399,6 +471,7 @@ DEF superb Robot {
           }
         ]
         name "rear_right_wheel"
+        contactMaterial "wheel"
         boundingObject Cylinder { radius 0.3160 height 0.2050 }
         physics Physics { density -1 mass 18.00 }
       }

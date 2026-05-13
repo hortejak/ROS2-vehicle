@@ -29,6 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'world_generator = webots_vehicle_sim.world_generator:main',
+            'vehicle_controller_plugin = webots_vehicle_sim.vehicle_controller_plugin:main',
         ],
     },
 )
