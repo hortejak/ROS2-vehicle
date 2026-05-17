@@ -3,4 +3,28 @@ install/
 log/
 .vscode/
 
-**/__pycache__/ 
+**/__pycache__/
+
+# Python packaging
+**/*.egg-info/
+dist/
+
+# Test & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ROS2 bag recordings
+*.db3
+*.mcap
+**/metadata.yaml
+
+# Generated simulation files
+*.wbt
+
+# Editor swap/conflict files
+*.swp
+*.orig
+
+# macOS
+.DS_Store
