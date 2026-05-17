@@ -15,3 +15,28 @@ vehicle:
       tire_width: 0.205
       wheel_mass: 18    # in kilograms
       ticks_per_revolution: 512
+  sensors:
+    # All positions are in metres relative to the rear axle centre (vehicle origin).
+    # Positive x = forward, positive y = left, positive z = up.
+    # Angles in radians: pitch nose-down negative, yaw left positive.
+    front_camera:
+      x: 2.50      # windshield base area, roughly above front axle
+      y: 0.00
+      z: 1.55      # just below roofline (~rearview mirror height)
+      pitch: -0.15  # ~9 deg nose-down to capture road markings
+      yaw: 0.00
+      horizontal_fov: 1.20  # ~70 deg, good lane-detection coverage
+      width: 640
+      height: 480
+      near: 0.5
+      far: 100.0
+    front_radar:
+      x: 3.70      # just behind front bumper (bumper at ~3.80 m)
+      y: 0.00
+      z: 0.50      # bumper height
+      pitch: 0.00
+      yaw: 0.00
+      horizontal_fov: 0.26  # ~15 deg narrow beam for ACC
+      vertical_fov: 0.10
+      min_range: 3.0
+      max_range: 150.0

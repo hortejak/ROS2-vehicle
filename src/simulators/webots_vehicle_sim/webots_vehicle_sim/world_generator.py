@@ -17,11 +17,45 @@ from interfaces.msg import VCON
 
 
 WORLD_OUTPUT_PATH = os.path.expanduser(
-    '~/ros2_ws/src/webots_vehicle_sim/worlds/superb.wbt'
+    '~/ros2_ws/src/simulators/webots_vehicle_sim/worlds/superb.wbt'
 )
 
+ROAD_SURFACE_Z = 0.10   # road sits 10 cm above the ground plane
 
-def generate_world(msg) -> str:
+
+def _sensor_rotation_vrml(pitch: float, yaw: float) -> str:
+    """Return a VRML axis-angle rotation string for the given pitch + yaw.
+
+    Pitch rotates around the Y axis (negative = nose down).
+    Yaw rotates around the Z axis (positive = left).
+    The combined quaternion is q_yaw * q_pitch so yaw is applied last.
+    """
+    cp2, sp2 = math.cos(pitch / 2.0), math.sin(pitch / 2.0)
+    cy2, sy2 = math.cos(yaw   / 2.0), math.sin(yaw   / 2.0)
+
+    # q_pitch (Y-axis): (x=0, y=sp2, z=0,   w=cp2)
+    # q_yaw   (Z-axis): (x=0, y=0,   z=sy2, w=cy2)
+    # combined = q_yaw * q_pitch
+    px, py, pz, pw = 0.0, sp2, 0.0,  cp2
+    qx, qy, qz, qw = 0.0, 0.0, sy2, cy2
+
+    rx = qw*px + qx*pw + qy*pz - qz*py
+    ry = qw*py - qx*pz + qy*pw + qz*px
+    rz = qw*pz + qx*py - qy*px + qz*pw
+    rw = qw*pw - qx*px - qy*py - qz*pz
+
+    angle = 2.0 * math.acos(max(-1.0, min(1.0, rw)))
+    s = math.sqrt(max(0.0, 1.0 - rw * rw))
+    if s < 1e-6:
+        return '0 0 1 0'
+    return f'{rx/s:.6f} {ry/s:.6f} {rz/s:.6f} {angle:.6f}'
+
+
+def generate_vehicle(msg) -> str:
+    """Returns the VRML Robot block for the Skoda Superb, derived from VCON."""
+
+    cam   = msg.front_camera
+    radar = msg.front_radar
 
     length      = msg.vehicle_dimensions.length
     width       = msg.vehicle_dimensions.width
@@ -32,148 +66,73 @@ def generate_world(msg) -> str:
     wheel_radius    = msg.wheel_dimensions.wheel_radius
     wheel_thickness = msg.wheel_dimensions.tire_width
     wheel_mass      = msg.wheel_dimensions.wheel_mass
-    ticks_per_revolution = msg.wheel_dimensions.ticks_per_revolution
 
     max_motor_torque_per_wheel = 2100
-    max_brake_torque = 500
 
     front_axle_x = wheelbase
-    front_axle_y = 0
     front_axle_z = wheel_radius
 
     rear_axle_x = 0
-    rear_axle_y = 0
     rear_axle_z = wheel_radius
 
-    cog_x = wheelbase/2
+    cog_x = wheelbase / 2
     cog_y = 0
-    cog_z = wheel_radius + height/2
+    cog_z = wheel_radius + height / 2
 
     left_y  =  track_width / 2.0
     right_y = -track_width / 2.0
 
-    # sedan 3-box silhouette
-    body_h  = height * 0.6                          # lower chassis height
-    cabin_h = height * 0.4                         # cabin (passenger cell) height
-    cabin_l = length * 0.44                          # cabin length
-    cabin_w = width  * 0.90                          # cabin slightly narrower than body
-    cabin_x = cog_x - length * 0.06                 # cabin biased slightly rearward
+    body_h  = height * 0.6
+    cabin_h = height * 0.4
+    cabin_w = width  * 0.90
     body_z  = wheel_radius + body_h  / 2
     cabin_z = wheel_radius + body_h  + cabin_h / 2
 
-    # lights (flush with front / rear face)
-    ll_x  = length * 0.025                          # light depth (X)
-    ll_y  = width  * 0.18                           # light width (Y)
-    ll_z  = height * 0.09                           # light height (Z)
-    fl_x  = cog_x + length / 2 - ll_x / 2          # front light center X
-    rl_x  = cog_x - length / 2 + ll_x / 2          # rear  light center X
-    lgt_z = wheel_radius + body_h * 0.65            # light center Z
-    lgt_y = width / 2 - ll_y / 2                    # light center |Y| (outer edge)
+    ll_x  = length * 0.025
+    ll_y  = width  * 0.18
+    ll_z  = height * 0.09
+    fl_x  = cog_x + length / 2 - ll_x / 2
+    rl_x  = cog_x - length / 2 + ll_x / 2
+    lgt_z = wheel_radius + body_h * 0.65
+    lgt_y = width / 2 - ll_y / 2
 
-    # windshields — slope expressed as dx/dz (horizontal set-back per unit rise)
-    ws_slope  = 1.1                                     # front windshield (from vertical)
-    rw_slope  = 0.9                                   # rear window  (from vertical)
-    ws_dx     = cabin_h * ws_slope                       # horizontal set-back of top vs bottom
+    ws_slope  = 1.1
+    rw_slope  = 0.9
+    ws_dx     = cabin_h * ws_slope
     rw_dx     = cabin_h * rw_slope
-    ws_slant  = cabin_h / math.cos(math.atan(ws_slope))  # true slant height
+    ws_slant  = cabin_h / math.cos(math.atan(ws_slope))
     rw_slant  = cabin_h / math.cos(math.atan(rw_slope))
-    ws_angle  = -math.atan(ws_slope)                     # rotation around Y (neg = top rearward)
-    rw_angle  =  math.atan(rw_slope)                     # rotation around Y (pos = top forward)
-    cabin_offset = -0.30                                 # shift whole cabin rearward
+    ws_angle  = -math.atan(ws_slope)
+    rw_angle  =  math.atan(rw_slope)
+    cabin_offset = -0.30
 
-    # windshield bottoms shifted by cabin_offset
-    ws_bot_x  = front_axle_x + cabin_offset             # windshield bottom X
-    rw_bot_x  = rear_axle_x  + cabin_offset             # rear window bottom X
-    ws_x      = ws_bot_x - ws_dx / 2                    # windshield center X
-    rw_x      = rw_bot_x + rw_dx / 2                    # rear window center X
-    ws_thick  = 0.025                                    # panel thickness
+    ws_bot_x  = front_axle_x + cabin_offset
+    rw_bot_x  = rear_axle_x  + cabin_offset
+    ws_x      = ws_bot_x - ws_dx / 2
+    rw_x      = rw_bot_x + rw_dx / 2
+    ws_thick  = 0.025
 
-    # cabin box spans exactly between the two windshield tops
     cabin_vis_l = wheelbase - ws_dx - rw_dx
     cabin_vis_x = (wheelbase + rw_dx - ws_dx) / 2 + cabin_offset
 
-    # pillar triangle fill geometry
     body_top    = wheel_radius + body_h
     cabin_top   = body_top + cabin_h
-    cabin_frt_x = ws_bot_x - ws_dx    # cabin front face X = windshield top X
-    cabin_rr_x  = rw_bot_x + rw_dx   # cabin rear  face X = rear-window top X
-    hy          = cabin_w / 2         # half cabin width
+    cabin_frt_x = ws_bot_x - ws_dx
+    cabin_rr_x  = rw_bot_x + rw_dx
+    hy          = cabin_w / 2
 
-    # side mirrors — mounted at A-pillar, beltline height
-    mir_lx = width * 0.09      # ~16 cm in forward direction
-    mir_ly = width * 0.05      # ~9 cm sticking out
-    mir_lz = height * 0.07     # ~10 cm tall
-    mir_x  = ws_bot_x          # at A-pillar / windshield base
+    mir_lx = width * 0.09
+    mir_ly = width * 0.05
+    mir_lz = height * 0.07
+    mir_x  = ws_bot_x
     mir_y  = width / 2 + mir_ly / 2
-    mir_z  = body_top + mir_lz / 2   # flush with body-cabin junction
+    mir_z  = body_top + mir_lz / 2
 
-    r,  g,  b  = 0.13, 0.25, 0.13
+    r, g, b = 0.13, 0.25, 0.13
 
-    world = (
-        '#VRML_SIM R2025a utf8\n'
-        'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/StraightRoadSegment.proto"\n'
-        'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/RoadLine.proto"\n'
-        'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/floors/protos/Floor.proto"\n'
-        '\n'
-        'WorldInfo {\n'
-        '  title "Vehicle Simulation"\n'
-        '  basicTimeStep 32\n'
-        '  coordinateSystem "ENU"\n'
-        '  contactProperties [\n'
-        '    ContactProperties {\n'
-        '      coulombFriction [ 0.7 ]\n'
-        '    }\n'
-        '  ]\n'
-        '}\n'
-        'Viewpoint {\n'
-        '  orientation 0 1 0 0.221\n'
-        '  position -50 0 15\n'
-        '  follow "Skoda_Superb_Mk1"\n'
-        '  followType "Tracking Shot"\n'
-        '}\n'
-        '\n'
-        'Background {\n'
-        '  skyColor [\n'
-        '    0.4 0.7 1.0\n'
-        '    0.4 0.7 1.0\n'
-        '    0.4 0.7 1.0\n'
-        '    0.4 0.7 1.0\n'
-        '    0.4 0.7 1.0\n'
-        '    0.4 0.7 1.0\n'
-        '  ]\n'
-        '}\n'
-        '\n'
-        'DirectionalLight {\n'
-        '  ambientIntensity 1\n'
-        '  direction 0.1 -1 -0.5\n'
-        '  intensity 1\n'
-        '}\n'
-        '\n'
-        'Floor {\n'
-        '  translation 0 0 0\n'
-        '  size 500 500\n'
-        '  contactMaterial "ground"\n'
-        '}\n'
-        '\n'
-        'StraightRoadSegment {\n'
-        '  translation 0 0 0\n'
-        '  name "main_road"\n'
-        '  width 8\n'
-        '  numberOfLanes 2\n'
-        '  numberOfForwardLanes 1\n'
-        '  lines [\n'
-        '    RoadLine {\n'
-        '      color 0.85 0.85 0.0\n'
-        '      type "continuous"\n'
-        '      width 0.15\n'
-        '    }\n'
-        '  ]\n'
-        '  length 200\n'
-        '  roadBoundingObject TRUE\n'
-        '}\n'
-        '\n'
+    return (
         'DEF superb Robot {\n'
-        '  translation 0 0 0\n'
+        f'  translation 0 0 {ROAD_SURFACE_Z + 0.02:.4f}\n'
         '  rotation 0 0 1 0\n'
         '  name "Skoda_Superb_Mk1"\n'
         '  children [\n'
@@ -365,6 +324,28 @@ def generate_world(msg) -> str:
         '    Accelerometer {\n'
         '      name "accelerometer"\n'
         '    }\n'
+        '\n'
+        f'    Camera {{\n'
+        f'      translation {cam.pose.x:.4f} {cam.pose.y:.4f} {cam.pose.z:.4f}\n'
+        f'      rotation {_sensor_rotation_vrml(cam.pose.pitch, cam.pose.yaw)}\n'
+        f'      name "front_camera"\n'
+        f'      fieldOfView {cam.horizontal_fov:.4f}\n'
+        f'      width {cam.width}\n'
+        f'      height {cam.height}\n'
+        f'      near {cam.near:.4f}\n'
+        f'      far {cam.far:.1f}\n'
+        f'    }}\n'
+        '\n'
+        f'    Radar {{\n'
+        f'      translation {radar.pose.x:.4f} {radar.pose.y:.4f} {radar.pose.z:.4f}\n'
+        f'      rotation {_sensor_rotation_vrml(radar.pose.pitch, radar.pose.yaw)}\n'
+        f'      name "front_radar"\n'
+        f'      minRange {radar.min_range:.1f}\n'
+        f'      maxRange {radar.max_range:.1f}\n'
+        f'      horizontalFieldOfView {radar.horizontal_fov:.4f}\n'
+        f'      verticalFieldOfView {radar.vertical_fov:.4f}\n'
+        f'    }}\n'
+        '\n'
         '    DEF FRONT_LEFT_STEER HingeJoint {\n'
         '      jointParameters HingeJointParameters {\n'
         '        axis 0 0 1\n'
@@ -606,7 +587,97 @@ def generate_world(msg) -> str:
         '}\n'
     )
 
-    return world
+
+def generate_world(msg) -> str:
+    """Returns the complete Webots .wbt world string for the given VCON message."""
+
+    return (
+        '#VRML_SIM R2025a utf8\n'
+        'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/StraightRoadSegment.proto"\n'
+        'EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/road/protos/RoadLine.proto"\n'
+        '\n'
+        'WorldInfo {\n'
+        '  title "Vehicle Simulation"\n'
+        '  basicTimeStep 32\n'
+        '  coordinateSystem "ENU"\n'
+        '  contactProperties [\n'
+        '    ContactProperties {\n'
+        '      coulombFriction [ 0.7 ]\n'
+        '      rollingFriction 0.015 0.015 0\n'
+        '    }\n'
+        '    ContactProperties {\n'
+        '      material1 "wheel"\n'
+        '      coulombFriction [ 1.0 ]\n'
+        '      softERP 0.8\n'
+        '      softCFM 0.00001\n'
+        '      rollingFriction 0.01 0.01 0\n'
+        '    }\n'
+        '  ]\n'
+        '}\n'
+        'Viewpoint {\n'
+        '  orientation 0 1 0 0.221\n'
+        '  position -50 0 15\n'
+        '  follow "Skoda_Superb_Mk1"\n'
+        '  followType "Tracking Shot"\n'
+        '}\n'
+        '\n'
+        'Background {\n'
+        '  skyColor [\n'
+        '    0.4 0.7 1.0\n'
+        '    0.4 0.7 1.0\n'
+        '    0.4 0.7 1.0\n'
+        '    0.4 0.7 1.0\n'
+        '    0.4 0.7 1.0\n'
+        '    0.4 0.7 1.0\n'
+        '  ]\n'
+        '}\n'
+        '\n'
+        'DirectionalLight {\n'
+        '  ambientIntensity 1\n'
+        '  direction 0.1 -1 -0.5\n'
+        '  intensity 1\n'
+        '}\n'
+        '\n'
+        'Solid {\n'
+        '  translation 0 0 -0.1\n'
+        '  name "ground"\n'
+        '  children [\n'
+        '    Shape {\n'
+        '      appearance PBRAppearance {\n'
+        '        baseColor 0.25 0.45 0.15\n'
+        '        roughness 1.0\n'
+        '        metalness 0.0\n'
+        '      }\n'
+        '      geometry Box { size 2000 2000 0.2 }\n'
+        '    }\n'
+        '  ]\n'
+        '  boundingObject Box { size 2000 2000 0.2 }\n'
+        '}\n'
+        '\n'
+        f'Solid {{\n'
+        f'  translation 0 0 {ROAD_SURFACE_Z - 0.5:.4f}\n'
+        '  name "road_physics"\n'
+        f'  boundingObject Box {{ size 2000 2000 1.0 }}\n'
+        '}\n'
+        '\n'
+        f'StraightRoadSegment {{\n'
+        f'  translation 0 0 {ROAD_SURFACE_Z}\n'
+        '  name "main_road"\n'
+        '  width 8\n'
+        '  numberOfLanes 2\n'
+        '  numberOfForwardLanes 1\n'
+        '  lines [\n'
+        '    RoadLine {\n'
+        '      color 0.85 0.85 0.0\n'
+        '      type "continuous"\n'
+        '      width 0.15\n'
+        '    }\n'
+        '  ]\n'
+        '  length 1000\n'
+        '  roadBoundingObject FALSE\n'
+        '}\n'
+        '\n'
+    ) + generate_vehicle(msg)
 
 
 class WorldGeneratorNode(Node):

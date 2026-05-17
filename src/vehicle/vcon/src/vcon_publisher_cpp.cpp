@@ -37,6 +37,29 @@ void VCONPublisher::load_vehicle_config()
         vcon_msg_.wheel_dimensions.wheel_mass = config["vehicle"]["dimensions"]["wheel_dimensions"]["wheel_mass"].as<double>();
         vcon_msg_.wheel_dimensions.ticks_per_revolution = config["vehicle"]["dimensions"]["wheel_dimensions"]["ticks_per_revolution"].as<double>();
 
+        auto load_pose = [](auto& pose, const YAML::Node& n) {
+            pose.x     = n["x"].as<double>();
+            pose.y     = n["y"].as<double>();
+            pose.z     = n["z"].as<double>();
+            pose.pitch = n["pitch"].as<double>();
+            pose.yaw   = n["yaw"].as<double>();
+        };
+
+        YAML::Node cam = config["vehicle"]["sensors"]["front_camera"];
+        load_pose(vcon_msg_.front_camera.pose, cam);
+        vcon_msg_.front_camera.horizontal_fov = cam["horizontal_fov"].as<double>();
+        vcon_msg_.front_camera.width          = cam["width"].as<uint32_t>();
+        vcon_msg_.front_camera.height         = cam["height"].as<uint32_t>();
+        vcon_msg_.front_camera.near           = cam["near"].as<double>();
+        vcon_msg_.front_camera.far            = cam["far"].as<double>();
+
+        YAML::Node radar = config["vehicle"]["sensors"]["front_radar"];
+        load_pose(vcon_msg_.front_radar.pose, radar);
+        vcon_msg_.front_radar.horizontal_fov = radar["horizontal_fov"].as<double>();
+        vcon_msg_.front_radar.vertical_fov   = radar["vertical_fov"].as<double>();
+        vcon_msg_.front_radar.min_range      = radar["min_range"].as<double>();
+        vcon_msg_.front_radar.max_range      = radar["max_range"].as<double>();
+
         RCLCPP_INFO(this->get_logger(), "Loaded config for: %s", vcon_msg_.name.c_str());
     } 
     catch (const std::exception & e) {

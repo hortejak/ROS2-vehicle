@@ -18,7 +18,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/WheelDimensions.msg"
   "msg/WheelTicks.msg"
   "msg/KinematicState.msg"
-  "msg/KinematicInput.msg"  
+  "msg/KinematicInput.msg"
+  "msg/SensorPose.msg"
+  "msg/CameraConfig.msg"
+  "msg/RadarConfig.msg"
   "msg/VCON.msg"
   "msg/SimulationVehicleCmd.msg"
 )

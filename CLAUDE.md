@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## General Instructions
+
+- Always use Context7 when working with external libraries or frameworks.
+- Once the node change has finished, try building it using colcon build --packages-select <package_name> and check for errors, if there are any, handle them.
+
 ## Build & Run
 
 ```bash
@@ -67,19 +72,47 @@ VCON.yaml → [vcon_publisher] → /params/VCON
 
 All custom messages live in `src/interfaces/msg/`:
 
-- `VCON` — vehicle identity + `VehicleDimensions` + `WheelDimensions`
+- `VCON` — full vehicle config (see VCON Message Structure below)
 - `KinematicState` — x, y, theta, v
 - `KinematicInput` — a (acceleration), delta (steering angle)
 - `SimulationVehicleCmd` — per-wheel throttle/brake torques + steering_wheel angle
 - `WheelTicks` — encoder ticks per wheel (FL/FR/RL/RR)
+- `SensorPose` — x, y, z, pitch, yaw in vehicle frame (rear-axle origin)
+- `CameraConfig` — SensorPose pose + horizontal_fov, width, height, near, far
+- `RadarConfig` — SensorPose pose + horizontal_fov, vertical_fov, min_range, max_range
+
+### VCON Message Structure
+
+```
+VCON
+  string name / uint16 id
+  VehicleDimensions   vehicle_dimensions  (length, width, height, wheelbase, track_width)
+  WheelDimensions     wheel_dimensions    (wheel_radius, tire_width, wheel_mass, ticks_per_revolution)
+  CameraConfig        front_camera
+  RadarConfig         front_radar
+```
+
+`SensorPose` origin = rear axle centre at ground. +x forward, +y left, +z up (ENU). Pitch nose-down negative, yaw left positive, both in radians.
+
+### Adding a new message to `interfaces`
+
+Four files must change together every time:
+1. Create `src/interfaces/msg/NewMsg.msg`
+2. Add it to `rosidl_generate_interfaces(...)` in `src/interfaces/CMakeLists.txt` (intra-package deps resolve automatically; only external packages need `DEPENDENCIES`)
+3. Load and assign in `src/vehicle/vcon/vcon/vcon_publisher_py.py`
+4. Load and assign in `src/vehicle/vcon/src/vcon_publisher_cpp.cpp`
+
+Then build: `colcon build --packages-select interfaces vcon`
 
 ## Vehicle Configuration
 
 Vehicle parameters are defined in `src/vehicle/vcon/VCON.yaml` (Skoda Superb Mk1):
 - Wheelbase: 2.803 m, Track width: 1.515 m
 - Wheel radius: 0.316 m, Ticks/rev: 512
+- Front camera: x=2.50, z=1.55, pitch=−0.15 rad, FOV=1.20 rad (70°), 640×480
+- Front radar: x=3.70, z=0.50, FOV=0.26 rad (15°), range 3–150 m
 
-Any code that needs vehicle geometry should subscribe to `/params/VCON` rather than hardcoding values.
+Any code that needs vehicle geometry or sensor configuration should subscribe to `/params/VCON` rather than hardcoding values.
 
 ## Kinematic Model Origins
 
@@ -94,6 +127,9 @@ The kinematic model supports three reference point origins (set via launch arg `
 - Webots driver starts 6 s after launch to allow world generation to complete
 - Vehicle uses FWD motor configuration; steering uses `WheelLinkPositionSensor`
 - Motor constants: MAX_MOTOR_TORQUE = 2100 Nm/wheel, MAX_BRAKE = 500 Nm
+- Sensor positions/params are read from VCON (`msg.front_camera`, `msg.front_radar`) — never hardcoded
+- `_sensor_rotation_vrml(pitch, yaw)` converts pitch+yaw angles to a VRML axis-angle string (q_yaw * q_pitch); lives in `world_generator.py`
+- Onboard sensors: GPS, InertialUnit, Gyro, Accelerometer, 4× wheel PositionSensor, 2× steer PositionSensor, Camera (`front_camera`), Radar (`front_radar`)
 
 ## Current Status
 

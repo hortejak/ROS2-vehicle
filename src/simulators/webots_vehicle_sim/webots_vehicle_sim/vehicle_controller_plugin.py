@@ -21,8 +21,7 @@ MAX_BRAKE_TORQUE    = 500.0                 # Nm per wheel
 
 TIMESTEP = 32
 
-ENGINE_RESISTANCE   =  2900.0   # N — constant engine compression braking
-ROLLING_RESISTANCE   = 224.0   # N — 0.015 * 1450 * 9.81
+ENGINE_RESISTANCE   =  200.0   # N — drivetrain drag when coasting (no gearbox, direct drive)
 AERO_DRAG_COEFF      = 0.39    # 0.5 * rho * Cd * A
 
 
@@ -188,14 +187,12 @@ class VehicleControllerPlugin:
 
         pos_fl = self._sensor_fl.getValue()
         pos_fr = self._sensor_fr.getValue()
-        if pos_fl != self._prev_pos_fl or pos_fr != self._prev_pos_fr:
-            vel_fl = abs(pos_fl - self._prev_pos_fl) / (TIMESTEP / 1000.0)
-            vel_fr = abs(pos_fr - self._prev_pos_fr) / (TIMESTEP / 1000.0)
-            self._avg_vel = (vel_fl + vel_fr) / 2.0
-            self._prev_pos_fl = pos_fl
-            self._prev_pos_fr = pos_fr
-
-        avg_vel = self._avg_vel  # use last valid velocity
+#        if pos_fl != self._prev_pos_fl or pos_fr != self._prev_pos_fr:
+        vel_fl = abs(pos_fl - self._prev_pos_fl) / (TIMESTEP / 1000.0)
+        vel_fr = abs(pos_fr - self._prev_pos_fr) / (TIMESTEP / 1000.0)
+        avg_vel = (vel_fl + vel_fr) / 2.0
+        self._prev_pos_fl = pos_fl
+        self._prev_pos_fr = pos_fr
         vehicle_speed = avg_vel * self._wheel_radius  # rad/s * m = m/s
 
         resistance_aero_force = AERO_DRAG_COEFF * pow(vehicle_speed,2)
@@ -225,11 +222,11 @@ class VehicleControllerPlugin:
         self._brake_rl.setDampingConstant(self._brake_rl_nm + resistance_damping/4)
         self._brake_rr.setDampingConstant(self._brake_rr_nm + resistance_damping/4)
 
-        self._node.get_logger().info(
-            f'target_engine_torque={target_torque:.1f} Nm/m '
-            f'wheel_ang_speed={avg_vel:.1f} rad/s '
-            f'velocity={vehicle_speed:.1f} m/s '
-            f'fl_brake={self._brake_fl_nm:.1f} Nm '
-            f'fr_brake={self._brake_fr_nm:.1f} Nm '
-            f'damping={resistance_damping:.1f} Nm*m/rad'
-        )
+#        self._node.get_logger().info(
+#            f'target_engine_torque={target_torque:.1f} Nm/m '
+#            f'wheel_ang_speed={avg_vel:.1f} rad/s '
+#            f'velocity={vehicle_speed:.1f} m/s '
+#            f'fl_brake={self._brake_fl_nm:.1f} Nm '
+#            f'fr_brake={self._brake_fr_nm:.1f} Nm '
+#            f'damping={resistance_damping:.1f} Nm*m/rad'
+#        )
